@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alteru.app/schemas/stateful-story-world-brief-v1.json",
+  "title": "Stateful Story World Brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["game", "experience", "world", "stats", "choiceIntents", "signatureItem", "danger", "visuals", "audio", "ending"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "game": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "titleZh", "titleEn", "mode", "languages"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "titleZh": { "type": "string", "minLength": 1 },
+        "titleEn": { "type": "string", "minLength": 1 },
+        "mode": { "enum": ["guided", "open-world"] },
+        "languages": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "enum": ["zh", "en"] } }
+      }
+    },
+    "experience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["playerFantasy", "emotionalPromise", "commonKnowledgeBoundary", "openingObjective"],
+      "properties": {
+        "playerFantasy": { "type": "string", "minLength": 20 },
+        "emotionalPromise": { "type": "string", "minLength": 20 },
+        "commonKnowledgeBoundary": { "type": "string", "minLength": 20 },
+        "openingObjective": { "type": "string", "minLength": 10 }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixedRules", "generationRules", "maxActiveThreads"],
+      "properties": {
+        "fixedRules": { "type": "array", "minItems": 3, "items": { "type": "string", "minLength": 10 } },
+        "generationRules": { "type": "array", "minItems": 3, "items": { "type": "string", "minLength": 10 } },
+        "maxActiveThreads": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "stats": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "labelZh", "labelEn", "min", "max", "initial", "display", "dangerDirection", "warningAt", "dangerAt", "maxDelta"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "labelZh": { "type": "string", "minLength": 1 },
+          "labelEn": { "type": "string", "minLength": 1 },
+          "min": { "type": "number" },
+          "max": { "type": "number" },
+          "initial": { "type": "number" },
+          "display": { "enum": ["bar", "number"] },
+          "dangerDirection": { "enum": ["low", "high"] },
+          "warningAt": { "type": "number" },
+          "dangerAt": { "type": "number" },
+          "maxDelta": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+    "choiceIntents": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string", "minLength": 5 } },
+    "signatureItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nameZh", "nameEn", "ability", "limitOrCost", "provenance"],
+      "properties": {
+        "nameZh": { "type": "string", "minLength": 1 },
+        "nameEn": { "type": "string", "minLength": 1 },
+        "ability": { "type": "string", "minLength": 10 },
+        "limitOrCost": { "type": "string", "minLength": 10 },
+        "provenance": { "type": "string", "minLength": 10 }
+      }
+    },
+    "danger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minSafeTurns", "maxSafeTurns", "cooldownTurns", "physicalCombat", "methods", "threatPalette", "fallbackStatId", "fallbackAmount"],
+      "properties": {
+        "minSafeTurns": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "maxSafeTurns": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "cooldownTurns": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "physicalCombat": { "enum": ["none", "rare", "allowed"] },
+        "methods": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string", "minLength": 5 } },
+        "threatPalette": { "type": "array", "minItems": 4, "items": { "type": "string", "minLength": 8 } },
+        "fallbackStatId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "fallbackAmount": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "visuals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["material", "artDirection", "entryScene", "sceneImageDirection", "itemImageDirection"],
+      "properties": {
+        "material": { "enum": ["harbor", "apartment", "wayfarer"] },
+        "artDirection": { "type": "string", "minLength": 20 },
+        "entryScene": { "type": "string", "minLength": 20 },
+        "sceneImageDirection": { "type": "string", "minLength": 20 },
+        "itemImageDirection": { "type": "string", "minLength": 20 }
+      }
+    },
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mood", "bpm"],
+      "properties": {
+        "mood": { "type": "string", "minLength": 10 },
+        "bpm": { "type": "number", "minimum": 36, "maximum": 120 }
+      }
+    },
+    "ending": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "failureConsequences"],
+      "properties": {
+        "type": { "enum": ["chapter-boundary", "true-ending"] },
+        "failureConsequences": { "type": "array", "minItems": 3, "items": { "type": "string", "minLength": 3 } }
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "./world-brief.schema.json",
+  "game": {
+    "id": "last-train-to-dawn",
+    "titleZh": "开往黎明的末班车",
+    "titleEn": "Last Train to Dawn",
+    "mode": "guided",
+    "languages": ["zh", "en"]
+  },
+  "experience": {
+    "playerFantasy": "You hold temporary authority over the last working train in a flooded region and decide its route, passengers, risks, repairs, and rescues.",
+    "emotionalPromise": "A tense but humane railway road trip where practical choices build a crew, change the train, and make every arrival feel earned.",
+    "commonKnowledgeBoundary": "A familiar near-present disaster world of stations, tunnels, small towns, storms, shortages, and ordinary people; no specialist railway knowledge is required.",
+    "openingObjective": "Restart the stranded train, choose the first branch of track, and reach Dawn Junction before the river overtops the final bridge."
+  },
+  "world": {
+    "fixedRules": [
+      "The train, route geography, elapsed stops, damage, fuel, owned items, promises, injuries, and passenger membership cannot be silently rewritten.",
+      "Every passenger knows only what they personally witnessed or were told, and companions remain registered by stable identity until an explicit departure or death.",
+      "Dawn Junction is reachable through three route families, but opened switches, collapsed bridges, rescued settlements, and abandoned stations remain persistent facts."
+    ],
+    "generationRules": [
+      "AI may create station incidents, survivors, rumors, salvage, weather, local factions, optional jobs, and short detours that obey the known route and current resources.",
+      "Every successful turn must change a route fact, resource, character relationship, item ownership, danger phase, or concrete objective fact.",
+      "Failure creates damage, lost fuel, separated companions, hostile passengers, blocked routes, or recovery missions instead of deleting the save or ending after a fixed number of turns.",
+      "The first sentence after every player action states its direct result; use at most three short beats before the next substantive decision, with no recap, repeated investigation, redundant confirmation, or atmosphere-only turn.",
+      "Each chapter takes 3–5 consequential decisions and each side job only 1–2; if two consecutive turns add no new place, person, item, threat, or chapter fact, force the main quest forward."
+    ],
+    "maxActiveThreads": 2
+  },
+  "stats": [
+    { "id": "fuel", "labelZh": "燃料", "labelEn": "Fuel", "min": 0, "max": 100, "initial": 68, "display": "bar", "dangerDirection": "low", "warningAt": 28, "dangerAt": 8, "maxDelta": 20 },
+    { "id": "condition", "labelZh": "车况", "labelEn": "Train Condition", "min": 0, "max": 100, "initial": 82, "display": "bar", "dangerDirection": "low", "warningAt": 35, "dangerAt": 12, "maxDelta": 22 },
+    { "id": "morale", "labelZh": "人心", "labelEn": "Crew Morale", "min": 0, "max": 100, "initial": 58, "display": "bar", "dangerDirection": "low", "warningAt": 30, "dangerAt": 10, "maxDelta": 18 }
+  ],
+  "choiceIntents": ["take a direct physical or engineering action", "negotiate, recruit, trade, or protect someone", "scout, detour, improvise, or spend a scarce item"],
+  "signatureItem": {
+    "nameZh": "总调度钥匙",
+    "nameEn": "Master Switch Key",
+    "ability": "Manually opens one sealed switch house or locked rail-service route and can create a new branch through a blocked region.",
+    "limitOrCost": "It has three brass teeth that shear away after overrides; each use is permanent and the final use may strand the train on the chosen line.",
+    "provenance": "The missing dispatcher pushed it through the station window moments before the regional power grid failed."
+  },
+  "danger": {
+    "minSafeTurns": 1,
+    "maxSafeTurns": 3,
+    "cooldownTurns": 2,
+    "physicalCombat": "allowed",
+    "methods": ["hold the line or repair under pressure", "talk, trade, recruit, or protect", "scout a detour and spend scarce equipment"],
+    "threatPalette": [
+      "armed fuel thieves board from an unlit maintenance platform",
+      "floodwater undermines a bridge while the train is already committed",
+      "a tunnel fire forces passengers to choose what cargo to abandon",
+      "a panicked carriage faction tries to seize control of the route",
+      "a landslide traps survivors on the opposite track as another train rolls downhill",
+      "a wounded animal pack follows the warm engine into a stalled station"
+    ],
+    "fallbackStatId": "condition",
+    "fallbackAmount": 12
+  },
+  "visuals": {
+    "material": "wayfarer",
+    "artDirection": "cinematic rain-soaked railway expedition, grounded near-present clothing and tools, oxidized steel, cream route paper, signal red, warm carriage amber, restrained hard-edged civic interface",
+    "entryScene": "a stalled diesel railcar beneath a dead departure canopy before dawn, floodwater across the outer tracks, scattered passengers waiting, one manual switch lever in the foreground, 4:5 portrait, no readable text",
+    "sceneImageDirection": "grounded cinematic disaster railway road movie, one legible action, clear actor separation, wet steel and sodium light, 4:5 portrait with central subject safety, no readable text or UI",
+    "itemImageDirection": "railway field inventory photograph on worn cream route paper and dark steel, object only, clear scale and wear, square, no people, no readable text"
+  },
+  "audio": {
+    "mood": "slow wheel rhythm, diesel pulse, rain on steel, distant signal bells, low strings during danger, warmer harmonics when passengers cooperate",
+    "bpm": 62
+  },
+  "ending": {
+    "type": "true-ending",
+    "failureConsequences": ["stranded recovery chapter", "permanent train damage", "lost route", "companion separation", "passenger mutiny", "scarce item consumed"]
+  }
+}
