@@ -13,7 +13,7 @@
 - `src/story/engine/`：协议解析、状态 reducer、危险导演、图片导演、结局导演和世界上下文构建。
 - `src/story/StoryShell.tsx`：封面、仪表盘、竖幅场景、结果/选择阶段、状态抽屉和继续/重开流程。
 - `src/story/audio/`：基于 Web Audio 的雨、柴油机、车轮节奏、提示和危险反馈。
-- `src/shared/runtime/`：Aigram bridge、媒体服务、上传和平台调用适配。
+- `src/shared/runtime/`：Aigram bridge、独立媒体服务（图片与五秒里程碑视频）、上传和平台调用适配。
 - `src/shared/save/useGameSave.ts`：AIgram 存档与浏览器本地镜像。
 - `public/poster.png`：1024×1024 英文正式海报；`meta.json` 指向该文件。
 - `_qa/`：协议、危险、结局检查与真实界面截图证据。
@@ -44,6 +44,8 @@
 
 永久游戏 UUID 为 `b2f2886f-46ec-459f-a70f-ab120a7b8edd`。存档命名空间为 `last-train-to-dawn`；平台存档不可用时保留浏览器本地恢复。再次进入有存档时使用模板现有的“继续游戏 / 重新开始”流程。
 
+正式叙事与旧 `chat_id` 兼容入口统一调用 AlterU `game-chat` 网关；运行时媒体统一调用 `https://game.aiwaves.tech/alteru-media/api`。公开源码不包含模型提供商或私人测试机地址。
+
 ## 4. 扩展点
 
 - 改玩法与章节：编辑 `lastTrainToDawn.ts` 的 `director.chapters`、`dangerDirector` 和演示回合；新增章节完成事实时同步结局条件。
@@ -51,4 +53,3 @@
 - 调数值：修改 `statDefinitions`、危险 DC、回退代价和各回合 `widget` 事务；三项主数值仍保持燃料、车况、人心。
 - 加人物/物品/地点：使用稳定 ID 添加到 `characters`、`initialInventory`、`initialMap`，并通过协议事务显式改变状态。
 - 加后端或多人痕迹：在 `src/story/adapters/` 增加适配器；共享内容只能补充站点传闻、援助或痕迹，不能覆盖本地权威主线状态。
-

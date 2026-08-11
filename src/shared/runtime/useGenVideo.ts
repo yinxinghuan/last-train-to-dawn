@@ -1,14 +1,6 @@
 import { useCallback, useState } from 'react'
-
-const submitEndpoint = 'https://u545921-b746-8a491f44.westc.seetacloud.com:8443/video'
-const pollEndpoint = 'https://u545921-b746-8a491f44.westc.seetacloud.com:8443/video_task'
-
-interface VideoPayload {
-  status?: string
-  url?: string
-  task_id?: string
-  data?: { status?: string; url?: string; task_id?: string }
-}
+import { getGameUuid } from './game-id'
+import { generateVideoMedia, MediaServiceError, waitForMediaTask } from './media'
 
 export interface GenVideoRequest {
   firstFrameUrl: string
@@ -16,66 +8,39 @@ export interface GenVideoRequest {
   prompt: string
   duration?: 5 | 10
   taskId?: string
+  soundPrompt?: string
 }
 
 export interface GenVideoResult { url: string; taskId: string }
 
-function readTaskId(payload: VideoPayload): string { return payload.task_id ?? payload.data?.task_id ?? '' }
-function readStatus(payload: VideoPayload): string { return payload.status ?? payload.data?.status ?? '' }
-function readUrl(payload: VideoPayload): string { return payload.url ?? payload.data?.url ?? '' }
-
-async function post(url: string, params: Record<string, unknown>, signal: AbortSignal): Promise<VideoPayload> {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: '', params }),
-    signal,
-  })
-  if (!response.ok) throw new Error(`video HTTP ${response.status}`)
-  return response.json() as Promise<VideoPayload>
-}
-
 export function useGenVideo() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const generate = useCallback(async ({ firstFrameUrl, lastFrameUrl, prompt, duration = 5, taskId: existingTaskId }: GenVideoRequest): Promise<GenVideoResult> => {
+  const generate = useCallback(async ({ firstFrameUrl, lastFrameUrl, prompt, duration = 5, taskId, soundPrompt }: GenVideoRequest): Promise<GenVideoResult> => {
     setLoading(true)
     setError(null)
-    const controller = new AbortController()
-    const timeout = window.setTimeout(() => controller.abort(), 30 * 60 * 1000)
     try {
-      let taskId = existingTaskId ?? ''
-      if (!taskId) {
-        const submitted = await post(submitEndpoint, {
-          image_url: firstFrameUrl,
-          end_image_url: lastFrameUrl,
+      const sessionId = getGameUuid()
+      if (!sessionId) throw new MediaServiceError('INVALID_REQUEST', 'Permanent game UUID is required for video generation', 0, false)
+      if (duration !== 5) throw new MediaServiceError('INVALID_REQUEST', 'The public media service currently supports five-second video only', 0, false)
+      const completed = taskId
+        ? await waitForMediaTask(taskId, { pollIntervalMs: 10_000, timeoutMs: 30 * 60_000 })
+        : await generateVideoMedia({
+          sessionId,
           prompt,
-          env: 'prod',
-          target_image_ratio: '4x3',
-          video_time: duration,
-        }, controller.signal)
-        taskId = readTaskId(submitted)
-        if (!taskId) throw new Error('video response had no task id')
-      }
-      const deadline = Date.now() + 30 * 60 * 1000
-      while (Date.now() < deadline) {
-        await new Promise<void>((resolve) => window.setTimeout(resolve, 10_000))
-        const result = await post(pollEndpoint, { task_id: taskId }, controller.signal)
-        const status = readStatus(result)
-        if (status === 'success') {
-          const url = readUrl(result)
-          if (!url) throw new Error('video completed without a url')
-          return { url, taskId }
-        }
-        if (status === 'failed') throw new Error('video generation failed')
-      }
-      throw new Error('video generation timed out')
+          soundPrompt: soundPrompt ?? 'subtle environmental ambience matching the visible action, no spoken dialogue',
+          startUrl: firstFrameUrl,
+          endUrl: lastFrameUrl,
+          ratio: '9:16',
+          durationSeconds: 5,
+        }, { pollIntervalMs: 10_000, timeoutMs: 30 * 60_000 })
+      if (completed.media?.type !== 'video') throw new MediaServiceError('INVALID_RESPONSE', 'Video task completed without video media', 200, false)
+      return { url: completed.media.url, taskId: completed.task_id }
     } catch (cause) {
       const next = cause instanceof Error ? cause : new Error(String(cause))
       setError(next)
       throw next
     } finally {
-      window.clearTimeout(timeout)
       setLoading(false)
     }
   }, [])
