@@ -5,7 +5,7 @@
 - React 18 + TypeScript 5 + Less + Vite 5。
 - 游戏采用独立导出的 Cinematic Civic 叙事壳；构建 `base: './'`，可部署到任意子路径。
 - 权威状态由本地 reducer 管理，大语言模型负责生成遵守协议的场景文本；数值、同伴、地图、物品、危险阶段和结局均通过结构化指令落盘。
-- 运行时图片通过 AlterU 独立媒体服务生成，当前目标尺寸为 `512×640`。仅当玩家是画面主要行动者时才带玩家头像参考。
+- 运行时图片通过 AlterU 独立媒体服务生成，当前目标尺寸为 `512×640`。仅当玩家是画面主要行动者时才带玩家头像参考；图片导演以车厢/驾驶室为默认空间舞台，并在提示版本升级时重建尚未完成的旧提示。
 
 ## 2. 目录结构
 
@@ -49,7 +49,7 @@
 ## 4. 扩展点
 
 - 改玩法与章节：编辑 `lastTrainToDawn.ts` 的 `director.chapters`、`dangerDirector` 和演示回合；新增章节完成事实时同步结局条件。
-- 换素材与画风：替换 `src/story/img/worlds/`，并同步调整 `sceneImageDirection`、`sceneImageAvoid`、`itemImageDirection` 和 `doc/visual.md`。
+- 换素材与画风：替换 `src/story/img/worlds/`，并同步调整 `sceneImageDirection`、`sceneImageAvoid`、`itemImageDirection` 和 `doc/visual.md`。修改运行时空间合同时递增 `SCENE_IMAGE_PROMPT_VERSION`，让未完成的旧场景图提示自动升级。
 - 调数值：修改 `statDefinitions`、危险 DC、回退代价和各回合 `widget` 事务；三项主数值仍保持燃料、车况、人心。
 - 加人物/物品/地点：使用稳定 ID 添加到 `characters`、`initialInventory`、`initialMap`，并通过协议事务显式改变状态。
 - 加后端或多人痕迹：在 `src/story/adapters/` 增加适配器；共享内容只能补充站点传闻、援助或痕迹，不能覆盖本地权威主线状态。

@@ -1,13 +1,13 @@
 import type { Locale, StoryCartridge, StoryDangerDirector, StoryEndingDirector, StoryImageDirector } from '../types'
 
 const coverImage = new URL('../img/worlds/last-train-to-dawn.png', import.meta.url).href
-const entryImage = new URL('../img/worlds/last-train-to-dawn-entry.png', import.meta.url).href
+const entryImage = new URL('../img/worlds/last-train-to-dawn-entry-v2.png', import.meta.url).href
 
 const demoZh = [
   {
     match: ['检修启动机', '启动机', '先修'],
     imageSubject: 'player' as const,
-    imagePrompt: 'SUBJECT A kneels beside the open starter housing of a stalled diesel railcar under a dead station canopy, rain blowing across the tracks, engineer Ada lighting the machinery from a separate position, decisive repair action, grounded near-present railway disaster, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the cramped driver cab and interior service vestibule of the stalled last diesel railcar, SUBJECT A kneels beside an open starter relay cabinet while young mechanic Ada lights the machinery from a separate position, anxious passengers visible through the open carriage connection, rain only glimpsed through windows, decisive repair action, the carriage interior fills the frame, grounded near-present railway disaster, 4:5 portrait, no readable text, no UI',
     content: `你拆开启动机护盖。积水没有进到主线圈，但一枚烧黑的继电器卡死在触点上。阿达把应急灯压低，让你看清还能抢救的铜片。
 [skill_check: skill="应急抢修" dc="9" rolls="11" modifier="2" total="13" result="success"]
 [widget: condition, add: 5]
@@ -31,7 +31,7 @@ const demoZh = [
   {
     match: ['候车厅', '上车规则', '说明路线', '稳定乘客'],
     imageSubject: 'player' as const,
-    imagePrompt: 'SUBJECT A stands at the center of a dark rural station waiting hall explaining a route plan to anxious passengers, engineer Ada and nurse Ren shown as separate people, rain and the waiting train visible through blank glass doors, grounded human tension, 4:5 portrait, no readable signs, no UI',
+    imagePrompt: 'inside the worn passenger carriage of the last diesel railcar, SUBJECT A stands in the aisle explaining a route plan to anxious seated and standing passengers, mechanic Ada and Doctor Ren shown as separate people, warm ceiling lamps and rain-streaked windows enclosing the group, grounded human tension, the carriage interior fills the frame, 4:5 portrait, no readable signs, no UI',
     content: `你没有承诺每个人都能原样抵达，只说清三条规则：危险会先警告；物资和岗位公开登记；任何人都可以在下一站离开。
 [widget: morale, add: 12]
 [character_update: character_id="ren-medic" character="任医生" role="乡镇急诊医生" detail="带着一只不完整的急救箱，主动提出负责伤员登记" lore="他错过了撤离车，因为留下来给最后两名病人缝合" vitality="76" stress="36" skills="急救: 5|安抚: 3"]
@@ -42,7 +42,7 @@ const demoZh = [
   {
     match: ['阿达检查', '制动', '转向架'],
     imageSubject: 'others' as const,
-    imagePrompt: 'young railway mechanic Ada separately inspecting the brake linkage beneath a stalled diesel railcar while SUBJECT A remains a distant observer, sparks, rainwater and one cracked hose, grounded documentary railway scene, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the rear maintenance vestibule of the stalled last diesel railcar, young mechanic Ada separately inspects a cracked brake hose through an open floor service hatch while SUBJECT A watches from the carriage aisle, work lamp, wet steel floor and passengers beyond the interior door, grounded documentary railway scene, the carriage interior fills the frame, 4:5 portrait, no readable text, no UI',
     content: `阿达钻进转向架下方，敲过第四根制动管时停住。软管外皮已经裂开，但钢丝层还没断；现在更换会耽误启程，带伤运行则可能在长下坡失压。
 [character_update: character_id="ada-mechanic" character="阿达" role="机修学徒" detail="发现二号转向架制动软管裂纹，等待你决定立即换管还是低速运行" lore="她会记住玩家是否尊重专业警告" vitality="82" stress="38" skills="机修: 5|判断异响: 3"]
 [fact: id="brake-hose-warning" value="true"]
@@ -51,7 +51,7 @@ const demoZh = [
   {
     match: ['河谷支线', '寻找氧气'],
     imageSubject: 'environment' as const,
-    imagePrompt: 'last diesel railcar entering a flooded river valley branch before dawn, weak signal lamps, a clinic roof visible beyond water and a damaged bridge ahead, cinematic grounded disaster road movie, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the moving driver cab of the last diesel railcar entering a flooded river valley branch before dawn, camera behind the worn controls and two crew silhouettes, weak signal lamps, clinic roof and damaged bridge visible only through the broad rain-streaked windscreen, the cab interior and human decision dominate the frame, cinematic grounded disaster road movie, 4:5 portrait, no readable text, no UI',
     content: `道岔扳到河谷线，末班车在雨里重新移动。十七分钟后，前灯照出半截被水冲空的桥台；诊所就在对岸，但桥上只剩一条完整钢轨。
 [map_update: new_location="河谷断桥" connected_to="死站" detail="通往诊所的短桥被洪水冲空半侧，只剩一条主轨与检修梁" lore="桥还能承受多少重量，没有任何人能从外观判断" facts="诊所在对岸|桥台继续被冲刷"]
 [fact: id="route-family" value="valley"]
@@ -63,7 +63,7 @@ const demoZh = [
   {
     match: ['采石场线', '补充燃料'],
     imageSubject: 'environment' as const,
-    imagePrompt: 'last diesel railcar entering an abandoned quarry freight yard before dawn, fuel tanks behind chained gates and armed silhouettes watching from loading gantries, rain, grounded cinematic railway survival, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the dim driver cab and front passenger vestibule of the last diesel railcar entering an abandoned quarry freight yard before dawn, crew and passengers react as fuel tanks behind chained gates and armed silhouettes appear through rain-streaked windows, the train interior fills most of the frame and the yard remains a view outside, grounded cinematic railway survival, 4:5 portrait, no readable text, no UI',
     content: `采石场线比旧图多出一道临时闸门。燃料罐还在，装卸台上却有人点亮三盏手电；他们用扩音器要求列车留下药品，才允许泵油。
 [map_update: new_location="灰石货场" connected_to="死站" detail="有完整燃料罐的废弃采石场货场，被一支临时守卫队控制" lore="守卫说他们保护附近三座避难点，也有人说他们扣住所有过路车辆" facts="燃料充足|守卫控制泵站"]
 [fact: id="route-family" value="quarry"]
@@ -96,7 +96,7 @@ const demoZh = [
   {
     match: ['低速压', '试桥', '全车重量', '夺取泵站', '紧急倒车'],
     imageSubject: 'player' as const,
-    imagePrompt: 'SUBJECT A leads the primary high-risk railway action while companions remain visually separate: the last diesel train inches through rain and structural danger, one clear decisive movement, grounded cinematic disaster, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the shaking driver cab of the last diesel railcar, SUBJECT A leads the primary high-risk railway action at the controls while Ada and another companion remain visually separate, rain and structural danger visible through the windscreen, passengers bracing in the connected carriage behind, one clear decisive movement, the cab interior fills the frame, grounded cinematic disaster, 4:5 portrait, no readable text, no UI',
     content: `你选择用最直接的方法抢在危险完成之前行动。列车与钢轨同时发出过载的呻吟，阿达在无线电里逐秒报出震动变化。
 [skill_check: skill="正面处置" dc="14" rolls="10" modifier="2" total="12" result="costly-success"]
 [widget: condition, remove: 12]
@@ -110,7 +110,7 @@ const demoZh = [
   {
     match: ['任医生谈', '交换比例', '电台询问', '同意交换'],
     imageSubject: 'others' as const,
-    imagePrompt: 'rural doctor Ren negotiates separately with wary station survivors beside the last train, medicine case and fuel hose between groups, SUBJECT A not depicted as the speaking actor, grounded humane disaster scene, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'viewed from inside the open side doorway of the last diesel railcar, rural doctor Ren negotiates separately with wary station survivors at the threshold, medicine case and fuel hose between groups, anxious passengers and warm carriage fittings frame the foreground, SUBJECT A not depicted as the speaking actor, grounded humane disaster scene, 4:5 portrait, no readable text, no UI',
     content: `任医生先把药箱打开，让对方看清哪些药能给、哪些药一旦交出就没人能替代。对面的领头人沉默很久，最后把燃料泵和避难点名单一起交出来。
 [skill_check: skill="有底线的交涉" dc="12" rolls="13" modifier="2" total="15" result="success"]
 [widget: fuel, add: 16]
@@ -136,7 +136,7 @@ const demoZh = [
   {
     match: ['检查转向架', '亮灯站台', '加入路线图', '邀请', '救出车里的人', '转移氧气'],
     imageSubject: 'others' as const,
-    imagePrompt: 'the last train stopped at a small lit platform before dawn, mechanic Ada and newly rescued passengers working separately around the railcar while warm carriage windows contrast with rain, chapter milestone, grounded cinematic road movie, 4:5 portrait, no readable text, no UI',
+    imagePrompt: 'inside the warm worn passenger carriage of the last train stopped at a small platform before dawn, mechanic Ada closes a service panel while newly rescued passengers settle into seats and Doctor Ren tends one patient, rain and the small platform visible only through windows, chapter milestone, humane grounded cinematic road movie, the carriage interior fills the frame, 4:5 portrait, no readable text, no UI',
     content: `列车在亮灯站台停稳。阿达把裂管换下，任医生接过氧气瓶，新上车的人则把下一段山口的真实路况一条条说清。
 [widget: condition, add: 10]
 [widget: morale, add: 6]
@@ -345,8 +345,8 @@ function build(locale: Locale): StoryCartridge {
     theme: { outer: '#10191D', surface: '#1B282C', paper: '#EFE8D7', ink: '#172126', muted: '#697276', accent: '#178C72', danger: '#D74935', gold: '#D49B3A', material: 'wayfarer' },
     audioTheme: { material: 'wayfarer', bpm: 62, rootHz: 55, scale: [1, 1.2, 1.333, 1.5, 1.778], levels: { music: 0.15, ambient: 0.23, sfx: 0.28, master: 0.72 }, tension: [{ statId: 'fuel', direction: 'low', weight: 0.25 }, { statId: 'condition', direction: 'low', weight: 0.45 }, { statId: 'morale', direction: 'low', weight: 0.3 }] },
     itemImageDirection: 'railway field inventory photograph on worn cream route paper and dark wet steel, object only, clear scale and wear, no people, no readable text, square',
-    sceneImageDirection: 'grounded cinematic near-present railway disaster road movie, oxidized steel, cream route paper, signal red and warm carriage amber, one legible action, clear actor separation, 4:5 portrait central safe composition, no readable text, no UI',
-    sceneImageAvoid: 'cover composition, repeated departure canopy, generic train hero shot, cyberpunk neon, steampunk, readable signs, pseudo-writing, duplicated faces, merged actors',
+    sceneImageDirection: 'grounded cinematic near-present railway disaster road movie whose recurring home stage is INSIDE the last diesel railcar: worn passenger carriage, driver cab, maintenance vestibule, medical corner, luggage racks, vinyl benches, cream enamel, oxidized steel and warm carriage amber. When an action can be staged aboard, the camera must remain inside and the carriage architecture must fill at least 70% of the frame; routes, bridges, stations and danger are seen through rain-streaked windows, the windscreen or an open doorway. Exterior shots are reserved for actions that physically require leaving the train, and the next compatible beat returns inside. One legible action, clear actor separation, signal red accents, 4:5 portrait central safe composition, no readable text, no UI',
+    sceneImageAvoid: 'camera standing on the tracks, rails as the dominant foreground, exterior train hero shot, repeated departure canopy, generic railway landscape, empty carriage, subway or luxury-train styling, cyberpunk neon, steampunk, readable signs, pseudo-writing, duplicated faces, merged actors',
     playerImageAliases: zh ? ['玩家', '你', '临时列车长', '带队者'] : ['player', 'you', 'temporary conductor', 'crew leader'],
     playerImageRole: s('掌握路线决定权的人，视觉身份完全由玩家参考图决定，不强制人类、脸部、性别或制服', 'the person holding route authority, whose complete visual identity comes only from the player reference without assuming a human face, gender or uniform'),
     playerImageExclusions: zh ? ['阿达', '任医生', '乘客', '盗贼', '动物'] : ['Ada', 'Doctor Ren', 'passengers', 'raiders', 'animals'],
@@ -393,13 +393,13 @@ function build(locale: Locale): StoryCartridge {
     ],
     drawerLabels: { party: s('列车成员', 'Train Crew'), map: s('线路图', 'Route Map'), inventory: s('物资舱', 'Supplies'), log: s('行车日志', 'Journey Log') },
     opening: {
-      location: s('北岬死站 · 一号站台', 'North Cape Dead Station · Platform One'),
+      location: s('北岬死站 · 末班车厢', 'North Cape Dead Station · Last Train Carriage'),
       time: s('第 1 夜 · 02:07', 'Night One · 02:07'),
       objective: s('在洪水切断出站线前启动列车并决定第一条路线', 'Restart the train and choose the first route before floodwater cuts the departure line'),
-      imagePrompt: 'a stalled diesel railcar beneath a dead rural station canopy before dawn, floodwater crossing outer tracks, anxious passengers waiting separately, one manual switch lever and repair tools in foreground, the player is the main decision-maker but appearance comes only from reference when used, grounded cinematic railway disaster, 4:5 portrait, central safe composition, no readable text, no UI, no logo',
+      imagePrompt: 'inside the worn passenger carriage and connected driver cab of the stalled last diesel railcar before dawn, the carriage interior fills the frame: cream enamel panels, oxidized steel window frames, vinyl benches, luggage racks, damp ribbed floor and warm ceiling lamps. Anxious passengers wait in readable separate groups, young mechanic Ada works at an open interior service panel, the empty driver seat shows leadership is missing, floodwater and the dead platform appear only as narrow glimpses through rain-streaked windows. In the foreground the player holds a heavy three-tooth brass switch key over a blank cream route sheet; appearance comes only from reference when used. Grounded cinematic railway disaster, humane tension, 4:5 portrait, central safe composition, absolutely no readable text, no UI, no logo, no exterior train hero view, no camera on tracks',
       blocks: [
         { id: 'ltd0', kind: 'narration', text: s('暴雨切断了公路，北岬站只剩一列柴油车还能移动。原列车长失踪，调度员把总调度钥匙塞给你后，最后一盏信号灯也熄灭了。', 'Flooding has cut every road. One diesel railcar can still move from North Cape Station. The conductor is missing; the dispatcher pushed the Master Switch Key to you before the last signal went dark.') },
-        { id: 'ltd1', kind: 'event', text: s('四十七名陌生人挤在站台。燃料只够走一条短线，启动机没有反应，河水正沿最外侧轨道漫向出站道岔。', 'Forty-seven strangers crowd the platform. There is fuel for one short branch, the starter is dead, and water is already crossing toward the departure switch.') },
+        { id: 'ltd1', kind: 'event', text: s('四十七名陌生人挤进车厢与门边。燃料只够走一条短线，启动机没有反应，窗外河水正漫向出站道岔。', 'Forty-seven strangers crowd the carriage and its doors. There is fuel for one short branch, the starter is dead, and beyond the windows water is crossing toward the departure switch.') },
         { id: 'ltd2', kind: 'dialogue', speaker: s('阿达', 'Ada'), tone: s('抱着机务灯', 'holding a mechanic’s lamp'), text: s('我能修，但你得决定先救列车、燃料，还是这些人的秩序。三件事来不及一起做。', 'I can fix it, but you must choose what comes first: the train, fuel, or order among these people. We cannot do all three in time.') },
       ],
       choices: [
