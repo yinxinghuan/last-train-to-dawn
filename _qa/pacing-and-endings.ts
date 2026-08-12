@@ -10,6 +10,16 @@ for (const cartridge of [lastTrainToDawn, lastTrainToDawnEn]) {
   assert((cartridge.director?.maxActiveThreads ?? 99) <= 2)
   assert(cartridge.director?.generationRules.some((rule) => /第一句|first sentence/i.test(rule)))
   assert(cartridge.director?.generationRules.some((rule) => /1–2|1-2/.test(rule)))
+  assert.equal(cartridge.opening.blocks.length, 6)
+  assert(cartridge.opening.blocks[0]?.text.match(/普通乘客|ordinary passenger/i))
+  assert(cartridge.opening.blocks[2]?.text.match(/四十七.*柴油车厢|forty-seven.*diesel carriages/i))
+  assert(cartridge.opening.blocks[3]?.text.match(/不能让你成为列车长|cannot make you a conductor/i))
+  assert.equal(cartridge.opening.blocks[3]?.kind, 'dialogue')
+  assert(cartridge.opening.blocks[4]?.text.match(/我叫阿达|I.m Ada/i))
+  assert(cartridge.opening.blocks[4]?.text.match(/不靠电网|does not need the electric grid/i))
+  assert(cartridge.opening.blocks[5]?.text.match(/只能先做一件事|one thing first/i))
+  assert(cartridge.opening.objective.match(/柴油列车.*铁路支线|diesel train.*railway branch/i))
+  assert(cartridge.sceneImageAvoid?.match(/road car.*bus.*subway.*metro/i))
 
   const save = createInitialSave(cartridge)
   save.scene = 30
@@ -31,4 +41,3 @@ for (const cartridge of [lastTrainToDawn, lastTrainToDawnEn]) {
 }
 
 console.log(JSON.stringify({ ok: true, chapters: 8, endingCapabilities: 8, endingAnchors: 8, pace: 'brisk' }))
-
