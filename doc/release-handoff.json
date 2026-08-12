@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 2,
+  "projectId": "last-train-to-dawn",
+  "uuid": "b2f2886f-46ec-459f-a70f-ab120a7b8edd",
+  "sourceCommit": "4e44593",
+  "buildCommand": "npm run build",
+  "distPath": "dist",
+  "posterPath": "public/poster.png",
+  "noticesPath": "public/THIRD_PARTY_NOTICES.txt",
+  "tests": [
+    "test:protocol",
+    "test:danger",
+    "test:ending",
+    "test:campaign",
+    "test:character-debut",
+    "test:domain",
+    "_qa/browser-domain-play.mjs"
+  ],
+  "deployment": {
+    "performed": true,
+    "owner": "codex-publisher",
+    "productionUrl": "https://game.aiwaves.tech/b2f2886f-46ec-459f-a70f-ab120a7b8edd/",
+    "mirrorUrl": "https://yinxinghuan.github.io/last-train-to-dawn/",
+    "catalogCommit": "a3e6de3",
+    "verifiedBundle": "assets/index-BOYRtEOU.js",
+    "verifiedAt": "2026-08-12"
+  },
+  "handoff": {
+    "currentState": "The eight-rule deterministic domain layer, hidden-character debut contract and conditional ending epilogues are the current dual-deployment release. Production and GitHub Pages are built from the same source release.",
+    "latestFixes": [
+      "Eight local rules atomically govern starter repair, route commitment, fuel search, station aid and three Master Switch Key overrides.",
+      "Governed turns reject all model protocol commands, including choices, and install feasible success or recovery choices locally.",
+      "Rejected governed actions make zero state changes and do not advance the danger clock.",
+      "Master Switch Key remaining uses derive from one persisted use counter instead of a second mutable count.",
+      "Doctor Ren, Lin and Mako remain outside the roster until a visible authored character update introduces their stable IDs.",
+      "Ending epilogues only require authored characters that actually exist in the immutable ending snapshot."
+    ],
+    "saveCompatibility": "Existing saves remain compatible. Legacy saves that preloaded hidden characters without a visible introduction are normalized by removing those entries unless the character is visible in story blocks, the party, relationships or an authored update.",
+    "nextChecks": [
+      "Extend deterministic rules only for later actions that mutate scarce resources, one-time rewards, route locks or permanent costs.",
+      "Preserve browser coverage for route rejection before repair, exact Condition +5 settlement and duplicate repair rejection.",
+      "When adding a new hidden companion, include a visible-form introduction and a character-debut regression test."
+    ]
+  }
+}
