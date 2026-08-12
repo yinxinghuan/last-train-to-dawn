@@ -26,7 +26,7 @@
 
 ### 状态与主循环
 
-每次输入先得到即时界面反馈，再由 `useStoryEngine` 解析生成结果。`protocol.ts` 将文本中的 `widget`、`party_change`、`inventory`、`map_update`、`fact`、`encounter`、`choices` 等命令转换为权威事务；`reducer.ts` 执行事务并保留历史。
+每次输入先得到即时界面反馈，再由 `useStoryEngine` 解析生成结果。`protocol.ts` 将文本中的 `widget`、`party_change`、`inventory`、`map_update`、`fact`、`encounter`、`choices` 等命令转换为权威事务，并清除完整或缺括号的 `image_prompt / image_subject` 元数据；`stageNarrative.ts` 只把真正有信息量的局面、后果和对白送进字幕。`reducer.ts` 执行事务并保留历史，存档规范化会移除旧协议残留。
 
 输入在危险导演之前先经过 `resolveDomainAction()`。未命中规则时沿用原有 AI 主持流程；命中时先检查地图、事实、物品、角色与危险阶段。合法动作以一个事务一次结算数值、事实、物品、小队、地图、危险与后续选项，非法动作零结算并返回具体原因，且不推进危险计时。受管辖回合拒绝模型产生的全部协议命令，并从图片导演/里程碑检测中隐藏这些命令，避免模型把“修启动机”和“搜燃料棚”等两个行动合并或让伪造奖励影响场景图。总调度钥匙的剩余次数由 `switch-key-uses` 单一事实派生，不保存第二份可漂移计数。
 

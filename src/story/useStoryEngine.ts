@@ -7,7 +7,7 @@ import { mockAdapter } from './adapters/mock'
 import { remoteAdapter } from './adapters/remote'
 import { resolveCartridge } from './cartridges'
 import { applyParsedScene, createImageBlock, createInitialSave, createRecoveryChoices, localizeKnownState, normalizeCharacterState, updateImageBlock, updateInventoryItemImage } from './engine/reducer'
-import { parseStoryProtocol } from './engine/protocol'
+import { isProtocolResidueText, parseStoryProtocol } from './engine/protocol'
 import { shouldRepairDirectPlayerAction, shouldUsePlayerImageReference, upgradePendingSceneImagePrompts } from './engine/imageDirector'
 import { buildPlayerIdentityPrompt } from './engine/imageIdentity'
 import { buildDangerDirective, normalizeDangerState } from './engine/dangerDirector'
@@ -96,7 +96,7 @@ function normalizeSave(candidate: LegacyStorySave | null | undefined, cartridge:
   if (!candidate || candidate.cartridgeId !== cartridge.id || !Array.isArray(candidate.blocks)) return createInitialSave(cartridge, incomingChatId)
   if (incomingChatId && candidate.remoteChatId && candidate.remoteChatId !== incomingChatId) return createInitialSave(cartridge, incomingChatId)
   const repaired = recoverPersistedChoices(repairMockLoop(candidate, cartridge), cartridge)
-  let blocks = repaired.blocks
+  let blocks = repaired.blocks.filter((block) => !isProtocolResidueText(block.text))
   if (!blocks.some((block) => block.kind === 'image')) {
     const legacyPrompt = repaired.imagePrompt?.trim() ?? ''
     const canRestoreImage = repaired.scene === 0 || Boolean(legacyPrompt || repaired.imageUrl)

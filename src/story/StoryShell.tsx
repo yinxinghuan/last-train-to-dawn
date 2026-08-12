@@ -393,7 +393,7 @@ function CinematicStage({ cartridge, engine, player, previewScene, onReturnLates
       {uiVariant === 'civic' && actionText && <div className={`ct-stage__action${engine.pendingAction && !isPreview ? ' is-pending' : ''}`}><small>{t(cartridge.locale, 'yourAction')}</small><p>{actionText}</p></div>}
       {overlayBlock && <div className={`ct-stage__caption ct-stage__caption--${overlayBlock.kind}`}>
         {speakerInitial && <span className="ct-stage__speaker" aria-hidden="true">{speakerInitial}</span>}
-        <div><small>{overlayBlock.speaker ?? t(cartridge.locale, openingDecision ? 'now' : turnPhase === 'decision' && !isPreview ? 'chooseNextAction' : 'now')}</small><p>{captionText}</p></div>
+        <div><small>{overlayBlock.speaker ?? t(cartridge.locale, 'now')}</small><p>{captionText}</p></div>
         {captionPages.length > 1 && (!openingDecision || captionPage < captionPages.length - 1) && <button type="button" className="ct-stage__caption-page" aria-label={t(cartridge.locale, 'nextCaptionPage')} onClick={() => setCaptionPage((current) => openingDecision ? Math.min(captionPages.length - 1, current + 1) : (current + 1) % captionPages.length)}><span>{captionPage + 1}/{captionPages.length}</span><Icon name="arrow" /></button>}
       </div>}
       <figcaption><span>{image?.text ?? engine.save.location}</span><small>{t(cartridge.locale, 'sceneNumber', { n: scene + 1 })}</small></figcaption>

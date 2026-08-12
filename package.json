@@ -15,7 +15,8 @@
     "test:ending": "TMPDIR=/private/tmp tsx _qa/ending-director.ts",
     "test:campaign": "TMPDIR=/private/tmp tsx _qa/pacing-and-endings.ts",
     "test:character-debut": "TMPDIR=/private/tmp tsx _qa/character-debut.ts",
-    "test:domain": "TMPDIR=/private/tmp tsx _qa/domain-rules.ts"
+    "test:domain": "TMPDIR=/private/tmp tsx _qa/domain-rules.ts",
+    "test:stage-narrative": "TMPDIR=/private/tmp tsx _qa/stage-narrative.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
