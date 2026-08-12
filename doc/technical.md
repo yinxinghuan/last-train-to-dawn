@@ -59,3 +59,9 @@
 - 调数值：受管辖动作修改 `domainRules.effects`；非受管辖自由行动才修改模型协议与 `widget` 限制。三项主数值仍保持燃料、车况、人心。
 - 加人物/物品/地点：使用稳定 ID 添加到 `characters`、`initialInventory`、`initialMap`，并通过协议事务显式改变状态。
 - 加后端或多人痕迹：在 `src/story/adapters/` 增加适配器；共享内容只能补充站点传闻、援助或痕迹，不能覆盖本地权威主线状态。
+
+## 连续性守门（2026-08-13）
+
+- Cartridge 通过 `transitionAnchor` 声明“同一节列车车厢里的调度图与岗位表”；`src/story/engine/continuity.ts` 生成地点桥接、压缩 `decisionContext` 并核验选项名词是否已有可见依据。
+- `reducer.ts` 在 `map_update` 与受管辖地图事务提交前插入桥接，并在选择落入 UI 前执行 grounded-choice 检查；旧存档升级到 StorySave v8 时从现有目标补齐 `decisionContext`。
+- `_qa/continuity-gate.ts` 以未登场的“国王 / 快递员 / 玻璃王国”作为反例，同时断言中转锚点先于目的地正文。
