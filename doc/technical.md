@@ -4,25 +4,31 @@
 
 - React 18 + TypeScript 5 + Less + Vite 5。
 - 游戏采用独立导出的 Cinematic Civic 叙事壳；构建 `base: './'`，可部署到任意子路径。
-- 权威状态由本地 reducer 管理，大语言模型负责生成遵守协议的场景文本；数值、同伴、地图、物品、危险阶段和结局均通过结构化指令落盘。
+- 权威状态由本地 reducer 管理，大语言模型负责场景文本。普通自由行动仍可使用结构化协议；命中领域规则的行动则由本地原子事务独占整回合状态，模型的全部协议命令（包括 `choices`）都会丢弃，后续选项由本地 resolution 安装。
 - 运行时图片通过 AlterU 独立媒体服务生成，当前目标尺寸为 `512×640`。仅当玩家是画面主要行动者时才带玩家头像参考；图片导演以车厢/驾驶室为默认空间舞台，并在提示版本升级时重建尚未完成的旧提示。
 
 ## 2. 目录结构
 
 - `src/story/cartridges/lastTrainToDawn.ts`：世界规则、开场、三项数值、人物、地图、物品、八章结构、危险导演和中英文演示切片。
-- `src/story/engine/`：协议解析、状态 reducer、危险导演、图片导演、结局导演和世界上下文构建。
+- `src/story/engine/domainRules.ts`：自由文本意图匹配、前置条件裁判、原子效果结算、本地后续选项、模型协议隔离和派生物品指标；拒绝动作不推进危险计时，丢弃命令不参与图片/里程碑触发。
+- `src/story/engine/` 其余模块：协议解析、状态 reducer、危险导演、图片导演、结局导演和世界上下文构建。
+- `src/story/engine/reducer.ts` 同时维护角色首次登场：`hiddenUntilIntroduced` 人物不进入初始/旧存档人物面板，可见 `character_update` 后才以 Cartridge 稳定 ID 创建。
+- `src/story/engine/endingDirector.ts` 只为结局快照里真实出现过的必需角色生成后日谈，隐藏人物不会在最终页被提前泄漏。
 - `src/story/StoryShell.tsx`：封面、仪表盘、竖幅场景、结果/选择阶段、状态抽屉和继续/重开流程。
 - `src/story/audio/`：基于 Web Audio 的雨、柴油机、车轮节奏、提示和危险反馈。
 - `src/shared/runtime/`：Aigram bridge、独立媒体服务（图片与五秒里程碑视频）、上传和平台调用适配。
 - `src/shared/save/useGameSave.ts`：AIgram 存档与浏览器本地镜像。
 - `public/poster.png`：1024×1024 英文正式海报；`meta.json` 指向该文件。
-- `_qa/`：协议、危险、结局检查与真实界面截图证据。
+- `_qa/domain-rules.ts`：8 条规则的对抗式状态回放；`_qa/browser-domain-play.mjs`：真实浏览器游玩；`_qa/ui/domain-rules/`：390×844 运行截图。
+- `_qa/character-debut.ts`：验证未来固定人物不会提前进入面板，旧预载状态可修复，可见介绍后恢复稳定 Cartridge 身份。
 
 ## 3. 核心模块
 
 ### 状态与主循环
 
 每次输入先得到即时界面反馈，再由 `useStoryEngine` 解析生成结果。`protocol.ts` 将文本中的 `widget`、`party_change`、`inventory`、`map_update`、`fact`、`encounter`、`choices` 等命令转换为权威事务；`reducer.ts` 执行事务并保留历史。
+
+输入在危险导演之前先经过 `resolveDomainAction()`。未命中规则时沿用原有 AI 主持流程；命中时先检查地图、事实、物品、角色与危险阶段。合法动作以一个事务一次结算数值、事实、物品、小队、地图、危险与后续选项，非法动作零结算并返回具体原因，且不推进危险计时。受管辖回合拒绝模型产生的全部协议命令，并从图片导演/里程碑检测中隐藏这些命令，避免模型把“修启动机”和“搜燃料棚”等两个行动合并或让伪造奖励影响场景图。总调度钥匙的剩余次数由 `switch-key-uses` 单一事实派生，不保存第二份可漂移计数。
 
 ### 屏幕适配
 
@@ -48,8 +54,8 @@
 
 ## 4. 扩展点
 
-- 改玩法与章节：编辑 `lastTrainToDawn.ts` 的 `director.chapters`、`dangerDirector` 和演示回合；新增章节完成事实时同步结局条件。
+- 改玩法与章节：编辑 `lastTrainToDawn.ts` 的 `director.chapters`、`dangerDirector`、`domainRules` 和演示回合；新增章节完成事实时同步结局条件。
 - 换素材与画风：替换 `src/story/img/worlds/`，并同步调整 `sceneImageDirection`、`sceneImageAvoid`、`itemImageDirection` 和 `doc/visual.md`。修改运行时空间合同时递增 `SCENE_IMAGE_PROMPT_VERSION`，让未完成的旧场景图提示自动升级。
-- 调数值：修改 `statDefinitions`、危险 DC、回退代价和各回合 `widget` 事务；三项主数值仍保持燃料、车况、人心。
+- 调数值：受管辖动作修改 `domainRules.effects`；非受管辖自由行动才修改模型协议与 `widget` 限制。三项主数值仍保持燃料、车况、人心。
 - 加人物/物品/地点：使用稳定 ID 添加到 `characters`、`initialInventory`、`initialMap`，并通过协议事务显式改变状态。
 - 加后端或多人痕迹：在 `src/story/adapters/` 增加适配器；共享内容只能补充站点传闻、援助或痕迹，不能覆盖本地权威主线状态。

@@ -1,4 +1,4 @@
-import type { Locale, StoryCartridge, StoryDangerDirector, StoryEndingDirector, StoryImageDirector } from '../types'
+import type { Locale, StoryCartridge, StoryDangerDirector, StoryDomainRules, StoryEndingDirector, StoryImageDirector } from '../types'
 
 const coverImage = new URL('../img/worlds/last-train-to-dawn.png', import.meta.url).href
 const entryImage = new URL('../img/worlds/last-train-to-dawn-entry-v2.png', import.meta.url).href
@@ -152,6 +152,7 @@ const demoZh = [
 function build(locale: Locale): StoryCartridge {
   const zh = locale === 'zh'
   const s = (cn: string, en: string) => zh ? cn : en
+  const c = (cn: [string, string, string], en: [string, string, string]): [string, string, string] => zh ? cn : en
   const imageDirector: StoryImageDirector = {
     maxQuietTurns: 1, softCooldownTurns: 0,
     guaranteedTriggers: ['new-location', 'rare-item', 'party-change', 'chapter-checkpoint', 'relationship-change', 'objective-change', 'skill-outcome'],
@@ -166,6 +167,121 @@ function build(locale: Locale): StoryCartridge {
     methods: zh ? ['正面守线或冒险抢修', '交涉、交换或保护他人', '侦察绕路并消耗装备'] : ['hold the line or repair under pressure', 'negotiate, trade or protect', 'scout a detour and spend equipment'],
     physicalCombat: 'occasional',
     resolution: { skill: s('线路生存', 'Rail Survival'), modifier: 1, dcBySeverity: [7, 10, 13, 16, 19], criticalDcBonus: 5, fallbackCosts: [{ statId: 'condition', operation: 'remove', amount: 12 }] },
+  }
+  const domainRules: StoryDomainRules = {
+    rules: [
+      {
+        id: 'repair-starter', intent: 'repair-starter',
+        match: zh ? ['检修启动机', '修启动机', '抢修启动机', '启动机'] : ['repair the starter', 'repair starter', 'fix the starter', 'starter'],
+        requirements: [
+          { type: 'map', nodeId: 'dead-station', reason: s('启动机只能在北岬死站停车时检修', 'The starter can only be repaired while stopped at North Cape Dead Station') },
+          { type: 'fact', id: 'starter-repaired', notEquals: true, reason: s('启动机已经修复，重复拆装不会再次提高车况', 'The starter is already repaired; reopening it cannot improve Condition again') },
+        ],
+        effects: [
+          { type: 'stat', id: 'condition', delta: 5 },
+          { type: 'fact', id: 'starter-repaired', value: true },
+          { type: 'party', change: 'add', characterId: 'ada-mechanic' },
+        ],
+        successText: s('烧黑的继电器被重新接通，发动机稳定点火；阿达正式接下机务岗位。', 'The burned relay reconnects, the engine catches, and Ada formally takes the engineering post.'),
+        successChoices: zh ? ['搜查西侧燃料棚', '检查制动与转向架', '说明上车规则'] : ['Search the west fuel shed', 'Inspect the brakes and bogies', 'Set the boarding rules'],
+      },
+      {
+        id: 'salvage-fuel-shed', intent: 'salvage-fuel-shed',
+        match: zh ? ['搜查燃料棚', '搜索燃料棚', '去燃料棚', '找柴油'] : ['search the fuel shed', 'search fuel shed', 'look for diesel'],
+        requirements: [
+          { type: 'map', nodeId: 'dead-station', reason: s('燃料棚只在北岬死站可达', 'The fuel shed is only reachable at North Cape Dead Station') },
+          { type: 'fact', id: 'fuel-shed-salvaged', notEquals: true, reason: s('燃料棚已经搜尽，剩余油桶都已进水', 'The fuel shed has already been exhausted; the remaining drums are contaminated') },
+        ],
+        effects: [
+          {
+            type: 'inventory', action: 'add', itemId: 'sealed-diesel', count: 2,
+            item: {
+              id: 'sealed-diesel', label: s('铅封柴油桶', 'Sealed Diesel Cans'), count: 0, rarity: 'common',
+              detail: s('两只未进水的二十升铁路备用柴油桶', 'Two intact twenty-liter railway reserve cans'),
+              effect: s('可在停车时转化为燃料；搬运时占用一名行动者', 'Convert to Fuel while stopped; moving them occupies one crew member'),
+              lore: s('死站每月更换一次的应急库存', 'Emergency stock rotated monthly before the station died'),
+              metrics: [{ id: 'capacity', label: s('容量', 'Capacity'), value: '40 L' }, { id: 'seal', label: s('状态', 'State'), value: s('铅封完整', 'Seals intact') }],
+              imagePrompt: 'two sealed red railway diesel cans and a manual transfer pump on wet concrete, object only, no people, no readable text, square',
+            },
+          },
+          { type: 'stat', id: 'fuel', delta: 14 },
+          { type: 'fact', id: 'fuel-shed-salvaged', value: true },
+        ],
+        successText: s('高架上只剩两只铅封完整的备用油桶；它们被登记入物资舱并接入油路。', 'Only two sealed reserve cans remain on the high rack; they enter the supply log and fuel line.'),
+        successChoices: zh ? ['接纳带孩子靠近的三个人', '先检查孩子与便携电台', '返回列车检查制动'] : ['Take aboard the three people with the child', 'Inspect the child and portable radio', 'Return to inspect the brakes'],
+      },
+      {
+        id: 'inspect-brakes', intent: 'inspect-brakes',
+        match: zh ? ['检查制动', '检查转向架', '检查软管', '阿达检查'] : ['inspect the brakes', 'inspect brakes', 'inspect the bogie', 'check the brake hose'],
+        requirements: [
+          { type: 'map', nodeId: 'dead-station', reason: s('完整制动检查需要列车停在死站检修位', 'A full brake inspection requires the dead-station service position') },
+          { type: 'fact', id: 'brake-hose-warning', notEquals: true, reason: s('裂纹已经完成记录，下一步应决定是否换管', 'The crack is already recorded; the next decision is whether to replace the hose') },
+        ],
+        effects: [{ type: 'fact', id: 'brake-hose-warning', value: true }],
+        successText: s('阿达确认二号转向架的制动软管外皮开裂，带伤运行会在长下坡失压。', 'Ada confirms a cracked brake hose on the second bogie; running it risks pressure loss on the descent.'),
+        successChoices: zh ? ['消耗备件立即换管', '记录裂纹后低速启程', '先修启动机再决定路线'] : ['Spend the spare hose and replace it now', 'Record the crack and depart at low speed', 'Repair the starter before choosing a route'],
+      },
+      {
+        id: 'replace-brake-hose', intent: 'replace-brake-hose',
+        match: zh ? ['更换制动软管', '立即换管', '换掉裂管', '用制动软管'] : ['replace the brake hose', 'replace brake hose', 'replace the cracked hose', 'use the spare hose'],
+        requirements: [
+          { type: 'map', nodeId: 'dead-station', reason: s('换管必须在死站停车检修位完成', 'The hose must be replaced while stopped at the dead-station service position') },
+          { type: 'fact', id: 'brake-hose-warning', equals: true, reason: s('还没有确认裂纹位置，不能盲目拆卸制动管', 'The crack has not been located; the brake line cannot be opened blindly') },
+          { type: 'item', id: 'spare-hose', minCount: 1, reason: s('物资舱里已经没有适配的制动软管', 'No compatible spare brake hose remains in the supply hold') },
+        ],
+        effects: [
+          { type: 'inventory', action: 'remove', itemId: 'spare-hose', count: 1 },
+          { type: 'stat', id: 'condition', delta: 10 },
+          { type: 'fact', id: 'brake-hose-warning', value: false },
+          { type: 'fact', id: 'brake-hose-replaced', value: true },
+        ],
+        successText: s('裂管和接头被整体换下，制动压力重新稳定；备用软管已经消耗。', 'The cracked hose and coupling come out as one piece; brake pressure stabilizes and the spare is consumed.'),
+        successChoices: zh ? ['修好启动机准备启程', '搜查燃料棚', '向乘客说明上车规则'] : ['Repair the starter and prepare to depart', 'Search the fuel shed', 'Set the boarding rules'],
+      },
+      ...([
+        ['commit-valley-route', 'commit-valley-route', zh ? ['走河谷支线', '选择河谷线', '去河谷找氧气'] : ['take the river valley branch', 'choose the valley line', 'go to the valley for oxygen'], 'valley', 'river-valley', -6],
+        ['commit-quarry-route', 'commit-quarry-route', zh ? ['走采石场线', '选择采石场线', '去灰石货场'] : ['take the quarry line', 'choose the quarry line', 'go to graystone yard'], 'quarry', 'graystone-yard', -5],
+        ['commit-forest-route', 'commit-forest-route', zh ? ['侦察没有回声的林线', '走黑松林线', '选择林线'] : ['scout the silent forest line', 'take the black pine line', 'choose the forest line'], 'forest', 'pine-line', -4],
+      ] as const).map(([id, intent, match, route, nodeId, fuelDelta]) => ({
+        id, intent, match: [...match],
+        requirements: [
+          { type: 'map' as const, nodeId: 'dead-station', reason: s('首发路线只能从北岬死站承诺', 'The first route can only be committed from North Cape Dead Station') },
+          { type: 'fact' as const, id: 'starter-repaired', equals: true, reason: s('启动机尚未修复，列车不能进入任何支线', 'The starter is not repaired; the train cannot enter a branch line') },
+          { type: 'fact' as const, id: 'route-family', equals: 'unset', reason: s('首发路线已经承诺，不能在同一章节静默改线', 'The first route is already committed and cannot be silently changed in this chapter') },
+        ],
+        effects: [
+          { type: 'fact' as const, id: 'route-family', value: route },
+          { type: 'map' as const, nodeId },
+          { type: 'stat' as const, id: 'fuel', delta: fuelDelta },
+        ],
+        successText: s(`道岔锁入${route === 'valley' ? '河谷' : route === 'quarry' ? '采石场' : '黑松林'}方向，首段行程的燃料成本已经结算。`, `The switch locks toward the ${route} route and the first-leg fuel cost is settled.`),
+        successChoices: c(['正面处理前方危险', '组织交涉或救援', '侦察绕路并准备工具'], ['Confront the danger directly', 'Organize negotiation or rescue', 'Scout a detour and prepare equipment']),
+        rejectionChoices: c(['和阿达检修启动机', '搜查西侧燃料棚', '检查制动与转向架'], ['Repair the starter with Ada', 'Search the west fuel shed', 'Inspect the brakes and bogies']),
+      })),
+      {
+        id: 'use-master-switch-key', intent: 'use-master-switch-key',
+        match: zh ? ['使用总调度钥匙', '用总调度钥匙', '钥匙打开维修岔线', '钥匙切入侧线'] : ['use the master switch key', 'use master switch key', 'key the maintenance siding', 'key into the siding'],
+        requirements: [
+          { type: 'item', id: 'master-switch-key', minCount: 1, reason: s('总调度钥匙不在物资舱中', 'The Master Switch Key is not in the supply hold') },
+          { type: 'fact', id: 'route-family', notEquals: 'unset', reason: s('尚未承诺路线，没有可覆盖的线路封锁', 'No route is committed, so there is no route lock to override') },
+          { type: 'fact', id: 'switch-key-uses', max: 2, reason: s('三枚黄铜齿已经全部折断，总调度钥匙不能再覆盖道岔', 'All three brass teeth have sheared; the Master Switch Key cannot override another switch') },
+          { type: 'danger', phases: ['warning', 'confrontation'], reason: s('当前线路没有需要覆盖的预警或对峙危险', 'The current route has no warning or confrontation that requires an override') },
+        ],
+        effects: [
+          { type: 'fact-add', id: 'switch-key-uses', delta: 1 },
+          { type: 'fact', id: 'hidden-route-open', value: true },
+          { type: 'stat', id: 'fuel', delta: -8 },
+          { type: 'danger', outcome: 'success' },
+        ],
+        successText: s('一枚黄铜齿折断，封闭维修线接回主轨；当前线路危险被绕过。', 'One brass tooth shears and the sealed maintenance route reconnects, bypassing the current route danger.'),
+        successChoices: c(['先救维修车里的人', '转移氧气与钢索', '检查救援车为何反锁'], ['Free the person in the rescue car', 'Transfer the oxygen and cable', 'Inspect why the rescue car was locked']),
+        rejectionChoices: c(['正面处理当前危险', '组织交涉保护乘客', '侦察绕路并保留钥匙'], ['Confront the current danger', 'Negotiate while protecting passengers', 'Scout a detour and preserve the key']),
+      },
+    ],
+    derivedItemMetrics: [{
+      itemId: 'master-switch-key', metricId: 'remaining-overrides', label: s('剩余覆盖', 'Overrides'),
+      factId: 'switch-key-uses', maximum: 3, mode: 'remaining-from-used',
+    }],
   }
   const endingDirector: StoryEndingDirector = {
     startRequirements: [
@@ -357,6 +473,7 @@ function build(locale: Locale): StoryCartridge {
       fixedWorldRules: [
         s('列车、路线、已过站点、损伤、燃料、物品、承诺、伤势和乘客成员不能被静默改写。', 'The train, route, passed stops, damage, fuel, items, promises, injuries and passenger membership cannot be silently rewritten.'),
         s('人物只知道亲眼看见或被告知的事实；伙伴必须用稳定身份持续存在。', 'Characters know only what they witnessed or were told; companions persist by stable identity.'),
+        s('尚未在正文中可见登场的人物不能出现在成员面板、目标或选项中；首次登场必须先写外形与身份来源，再允许相关行动。', 'Characters not yet visibly introduced in prose cannot appear in the roster, objective or choices; a debut must show their appearance and identity source before related actions.'),
         s('每次获得、消耗、交换、损坏或遗失物品都必须进入权威背包事务。', 'Every acquisition, consumption, trade, breakage or loss must use an authoritative inventory transaction.'),
       ],
       generationRules: [
@@ -367,6 +484,7 @@ function build(locale: Locale): StoryCartridge {
         s('每章用 3–5 次有后果的玩家决定完成；每条支线最多占 1–2 次决定。连续两回合若没有新地点、新人物、新物品、新危险或章节事实，下一回合必须强制推进主线。', 'Complete each chapter in 3–5 consequential player decisions; a side job may consume only 1–2 decisions. If two consecutive turns add no new place, person, item, threat or chapter fact, the next turn must force the main quest forward.'),
         s('危险预警只占一个回合；下一回合必须进入对峙，玩家回应后的下一回合必须结算并打开新局面。', 'A danger warning occupies one turn only; the next turn must confront it, and the turn after the player response must resolve it and open a new situation.'),
         s('玩家行动后的第一句必须给出直接结果；正文最多三个短节拍，然后立即停在新的实质选择。禁止用“继续调查、再看看、确认一下”作为没有收益的过渡。', 'The first sentence after an action must give its direct result; use at most three short beats, then stop at a new substantive choice. Never use continue investigating, look again or confirm as payoff-free transitions.'),
+        s('新角色首次出现必须按“可见外形或动作—名字或身份来源—当前关系—互动选项”的顺序；隐藏协议命令不算玩家看见。', 'A new character debut must follow visible form or action, name or identity source, current relationship, then interaction choices; hidden protocol commands do not count as visible introduction.'),
       ],
       choiceIntents: zh ? ['直接行动或工程处理', '交涉、招募、交易或保护', '侦察、绕路、即兴或消耗物品'] : ['direct physical or engineering action', 'negotiate, recruit, trade or protect', 'scout, detour, improvise or spend an item'],
       maxActiveThreads: 2,
@@ -384,6 +502,7 @@ function build(locale: Locale): StoryCartridge {
       finaleRule: s('只有抵达黎明枢纽并完成列车归属抉择才是真结局；章节结束均可继续。', 'Only arrival at Dawn Junction plus the ownership decision is a true ending; chapter endings remain resumable.'),
     },
     dangerDirector,
+    domainRules,
     endingDirector,
     initialFacts: { 'switch-key-uses': 0, 'rescued-count': 0, 'route-family': 'unset', 'passenger-rules-public': false },
     statDefinitions: [
@@ -410,9 +529,9 @@ function build(locale: Locale): StoryCartridge {
     },
     characters: [
       { id: 'ada-mechanic', name: s('阿达', 'Ada'), role: s('机修学徒', 'Apprentice mechanic'), vitality: 82, stress: 48, initialStatus: 'known', skills: [{ id: 'repair', label: s('机修', 'Repair'), value: 5 }, { id: 'listen', label: s('判断异响', 'Mechanical Ear'), value: 3 }], detail: s('抱着机务灯，知道这列车每一处不该出现的声音。', 'She carries a mechanic’s lamp and knows every sound this train should not make.'), lore: s('她刚通过实操考试，却因没有正式证件而一直不敢自称机修师。', 'She passed her practical exam but still refuses the title of mechanic without the missing certificate.') },
-      { id: 'ren-medic', name: s('任医生', 'Doctor Ren'), role: s('乡镇急诊医生', 'Rural emergency doctor'), vitality: 76, stress: 36, initialStatus: 'known', skills: [{ id: 'medicine', label: s('急救', 'Medicine'), value: 5 }, { id: 'calm', label: s('安抚', 'Calm'), value: 3 }], detail: s('带着不完整的急救箱，先登记伤员再谈自己去哪。', 'He carries an incomplete medical case and records the injured before discussing his own destination.'), lore: s('他错过撤离车，因为留下来给最后两名病人缝合。', 'He missed evacuation because he stayed to close the last two wounds.') },
-      { id: 'lin-scout', name: s('林澈', 'Lin'), role: s('线路巡检员', 'Track inspector'), vitality: 88, stress: 31, initialStatus: 'known', skills: [{ id: 'scout', label: s('侦察', 'Scouting'), value: 5 }, { id: 'routes', label: s('线路记忆', 'Route Memory'), value: 4 }], detail: s('在更北边失联，只有一段断续电台呼号证明他还活着。', 'Missing farther north, with only a broken radio call proving he may be alive.'), lore: s('他知道一条地图没有标出的木场侧线，也知道调度员为何关闭它。', 'He knows an unmarked timber siding and why the dispatcher sealed it.') },
-      { id: 'mara-raider', name: s('玛柯', 'Mako'), role: s('货场守卫队长', 'Freight-yard guard captain'), vitality: 90, stress: 55, initialStatus: 'known', skills: [{ id: 'defense', label: s('防卫', 'Defense'), value: 5 }, { id: 'command', label: s('统率', 'Command'), value: 4 }], detail: s('控制灰石货场燃料，声称所有扣留都为附近避难点。', 'Controls Graystone Yard fuel and claims every seizure protects nearby shelters.'), lore: s('他可以成为危险敌人、严格盟友或临时同行者，取决于药品与燃料的第一次交换。', 'He may become an enemy, strict ally or temporary companion depending on the first medicine-for-fuel exchange.') },
+      { id: 'ren-medic', name: s('任医生', 'Doctor Ren'), role: s('乡镇急诊医生', 'Rural emergency doctor'), vitality: 76, stress: 36, initialStatus: 'known', hiddenUntilIntroduced: true, skills: [{ id: 'medicine', label: s('急救', 'Medicine'), value: 5 }, { id: 'calm', label: s('安抚', 'Calm'), value: 3 }], detail: s('带着不完整的急救箱，先登记伤员再谈自己去哪。', 'He carries an incomplete medical case and records the injured before discussing his own destination.'), lore: s('他错过撤离车，因为留下来给最后两名病人缝合。', 'He missed evacuation because he stayed to close the last two wounds.') },
+      { id: 'lin-scout', name: s('林澈', 'Lin'), role: s('线路巡检员', 'Track inspector'), vitality: 88, stress: 31, initialStatus: 'known', hiddenUntilIntroduced: true, skills: [{ id: 'scout', label: s('侦察', 'Scouting'), value: 5 }, { id: 'routes', label: s('线路记忆', 'Route Memory'), value: 4 }], detail: s('在更北边失联，只有一段断续电台呼号证明他还活着。', 'Missing farther north, with only a broken radio call proving he may be alive.'), lore: s('他知道一条地图没有标出的木场侧线，也知道调度员为何关闭它。', 'He knows an unmarked timber siding and why the dispatcher sealed it.') },
+      { id: 'mara-raider', name: s('玛柯', 'Mako'), role: s('货场守卫队长', 'Freight-yard guard captain'), vitality: 90, stress: 55, initialStatus: 'known', hiddenUntilIntroduced: true, skills: [{ id: 'defense', label: s('防卫', 'Defense'), value: 5 }, { id: 'command', label: s('统率', 'Command'), value: 4 }], detail: s('控制灰石货场燃料，声称所有扣留都为附近避难点。', 'Controls Graystone Yard fuel and claims every seizure protects nearby shelters.'), lore: s('他可以成为危险敌人、严格盟友或临时同行者，取决于药品与燃料的第一次交换。', 'He may become an enemy, strict ally or temporary companion depending on the first medicine-for-fuel exchange.') },
     ],
     initialMap: [
       { id: 'dead-station', label: s('北岬死站', 'North Cape Dead Station'), current: true, visited: true, detail: s('被洪水和停电遗弃的乡镇终点站，剩下一列可抢修的柴油车。', 'A rural terminus abandoned by flood and blackout, with one repairable diesel train.'), lore: s('这列车不是救援列车；它只是最后一件还能移动的公共工具。', 'This is not a rescue train. It is simply the last public machine still able to move.'), facts: [s('47 人等待上车', '47 people wait'), s('出站道岔即将进水', 'departure switch is flooding')] },
@@ -425,7 +544,7 @@ function build(locale: Locale): StoryCartridge {
       { id: 'dawn-junction', label: s('黎明枢纽', 'Dawn Junction'), detail: s('洪水桥后的区域铁路中心，也是所有路线的终点。', 'The regional rail center beyond the flood bridge and the end of every route.'), lore: s('抵达只能回答怎么活下来，不能替所有人决定以后听谁的。', 'Arrival answers how to survive, not who everyone must obey afterward.') },
     ],
     initialInventory: [
-      { id: 'master-switch-key', label: s('总调度钥匙', 'Master Switch Key'), count: 1, rarity: 'legendary', detail: s('三齿黄铜总钥匙，可机械覆盖封闭道岔。', 'A three-tooth brass master key that mechanically overrides sealed switches.'), effect: s('打开一座封闭道岔房或隐藏维修线；每次使用永久折断一枚钥匙齿。', 'Opens one sealed switch house or hidden maintenance route; each use permanently shears one tooth.'), lore: s('失踪调度员在全区停电前交给玩家。', 'The missing dispatcher gave it to the player before the regional blackout.'), metrics: [{ label: s('剩余覆盖', 'Overrides'), value: '3' }, { label: s('材质', 'Material'), value: s('铁路黄铜', 'Rail brass') }], imagePrompt: 'single heavy three-tooth brass railway master switch key on cream route paper and wet dark steel, object only, no hands, no readable text, square' },
+      { id: 'master-switch-key', label: s('总调度钥匙', 'Master Switch Key'), count: 1, rarity: 'legendary', detail: s('三齿黄铜总钥匙，可机械覆盖封闭道岔。', 'A three-tooth brass master key that mechanically overrides sealed switches.'), effect: s('打开一座封闭道岔房或隐藏维修线；每次使用永久折断一枚钥匙齿。', 'Opens one sealed switch house or hidden maintenance route; each use permanently shears one tooth.'), lore: s('失踪调度员在全区停电前交给玩家。', 'The missing dispatcher gave it to the player before the regional blackout.'), metrics: [{ id: 'remaining-overrides', label: s('剩余覆盖', 'Overrides'), value: '3' }, { id: 'material', label: s('材质', 'Material'), value: s('铁路黄铜', 'Rail brass') }], imagePrompt: 'single heavy three-tooth brass railway master switch key on cream route paper and wet dark steel, object only, no hands, no readable text, square' },
       { id: 'field-radio', label: s('铁路电台', 'Rail Field Radio'), count: 1, rarity: 'common', detail: s('电池剩余一半，只能稳定接收近距离线路呼号。', 'Half-charged radio that reliably receives only nearby rail calls.'), effect: s('在进入危险前确认一次远处声音或求救是否真实。', 'Confirms whether one distant call or warning is real before entering danger.'), lore: s('死站值班室唯一仍能工作的公共电台。', 'The only public radio still working in the station office.'), metrics: [{ label: s('电量', 'Charge'), value: '52%' }], imagePrompt: 'single rugged railway field radio with blank screen and worn antenna on wet steel, object only, no people, no readable text, square' },
       { id: 'spare-hose', label: s('制动软管', 'Spare Brake Hose'), count: 1, rarity: 'common', detail: s('适配旧柴油车二号转向架的备用软管。', 'A spare hose fitting the old railcar’s second bogie.'), effect: s('停车时消耗，可恢复 10 点车况并消除一次制动裂纹事实。', 'Consumed while stopped to restore 10 Condition and clear one brake-hose fault.'), lore: s('阿达从报废检修车上拆下并重新封存。', 'Ada reclaimed and resealed it from a retired service car.'), metrics: [{ label: s('耐压', 'Pressure'), value: '1.0 MPa' }], imagePrompt: 'single coiled railway brake hose with steel couplings and inspection tag turned blank, object only, no people, no readable text, square' },
     ],

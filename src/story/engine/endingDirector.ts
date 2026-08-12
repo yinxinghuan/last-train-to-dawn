@@ -88,7 +88,9 @@ export function buildEndingSnapshot(save: StorySave, cartridge: StoryCartridge):
 }
 
 function requiredEndingCharacterIds(snapshot: StoryEndingSnapshot, cartridge: StoryCartridge): string[] {
+  const known = new Set(snapshot.characters.map((character) => character.id))
   return [...new Set([...(cartridge.endingDirector?.requiredCharacterIds ?? []), ...snapshot.partyMemberIds])]
+    .filter((id) => known.has(id))
 }
 
 export function validateEndingCandidate(candidate: StoryEndingCandidate, snapshot: StoryEndingSnapshot, cartridge: StoryCartridge): string[] {
