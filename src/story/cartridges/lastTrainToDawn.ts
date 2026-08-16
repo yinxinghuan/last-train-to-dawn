@@ -157,6 +157,7 @@ function build(locale: Locale): StoryCartridge {
     maxQuietTurns: 1, softCooldownTurns: 0,
     guaranteedTriggers: ['new-location', 'rare-item', 'party-change', 'chapter-checkpoint', 'relationship-change', 'objective-change', 'skill-outcome'],
     softTriggers: [],
+    perspective: { ordinary: 'balanced', importantDialogue: 'first-person', newLocation: 'observer' },
   }
   const dangerDirector: StoryDangerDirector = {
     minSafeTurns: 1, maxSafeTurns: 3, cooldownTurns: 2,
@@ -164,7 +165,8 @@ function build(locale: Locale): StoryCartridge {
     threatPalette: zh
       ? ['武装燃料盗贼从无灯检修台登车', '洪水在列车已经上桥后掏空桥台', '隧道火灾迫使乘客决定放弃哪些货物', '恐慌车厢试图夺取路线控制', '失控货车从山坡倒退逼近', '受伤兽群追随温暖发动机进入车站']
       : ['armed fuel thieves board from an unlit maintenance platform', 'floodwater undermines a bridge after the train commits', 'a tunnel fire forces a cargo sacrifice', 'a panicked carriage attempts to seize route control', 'runaway freight cars roll downhill', 'wounded animals follow the warm engine into a station'],
-    methods: zh ? ['正面守线或冒险抢修', '交涉、交换或保护他人', '侦察绕路并消耗装备'] : ['hold the line or repair under pressure', 'negotiate, trade or protect', 'scout a detour and spend equipment'],
+    methods: zh ? ['用车载探灯确认威胁来向', '把乘客撤到前车并锁住连接门', '用维修工具加固眼前故障点'] : ['Use the train lamp to locate the threat', 'Move passengers forward and lock the gangway door', 'Use repair tools on the immediate failure point'],
+    legacyMethods: zh ? [['正面守线或冒险抢修', '交涉、交换或保护他人', '侦察绕路并消耗装备']] : [['hold the line or repair under pressure', 'negotiate, trade or protect', 'scout a detour and spend equipment']],
     physicalCombat: 'occasional',
     resolution: { skill: s('线路生存', 'Rail Survival'), modifier: 1, dcBySeverity: [7, 10, 13, 16, 19], criticalDcBonus: 5, fallbackCosts: [{ statId: 'condition', operation: 'remove', amount: 12 }] },
   }

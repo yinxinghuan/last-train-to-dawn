@@ -11,10 +11,13 @@ await page.addInitScript(() => {
   localStorage.clear()
   sessionStorage.clear()
 })
-await page.goto('http://127.0.0.1:4173/?story_mode=demo&ui=civic&lang=zh', { waitUntil: 'domcontentloaded' })
+const qaBase = process.env.QA_BASE || 'http://127.0.0.1:4173/'
+await page.goto(`${qaBase}?story_mode=demo&ui=civic&lang=zh`, { waitUntil: 'domcontentloaded' })
 await page.addStyleTag({ content: '#alteru-guest-banner{display:none!important}' })
 
 await page.getByRole('button', { name: /启动末班车/ }).click()
+const openingPage = page.locator('.ct-stage__caption-page')
+while (await openingPage.isVisible().catch(() => false)) await openingPage.click()
 await page.getByRole('textbox', { name: '自定义行动' }).waitFor()
 
 async function act(text) {
