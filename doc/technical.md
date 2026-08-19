@@ -72,3 +72,8 @@
 - StoryImageDirector.perspective 分别配置普通镜头、重要对话和新地点；当前产品使用 balanced / first-person / observer。
 - engine/imageDirector.ts 在每次图片决策中写入 perspective，第一人称自动取消 playerVisible 与头像参考；玩家主导动作强制 observer。SCENE_IMAGE_PROMPT_VERSION=11 只重写尚未完成的旧图片任务，不批量重画历史成图。
 - _qa/perspective-director.ts 对中英文各运行 20 张普通镜头，并覆盖重要对话、新地点和玩家主导动作。运行 npm run test:perspective 后再构建。
+
+## 行动权威影子审计（2026-08-20）
+
+- `engine/authorityShadow.ts` 在不改变确定性列车阶段流的前提下，将已显示选项按原有 `domainRules` 分类为 `accepted / rejected / open`，并报告非终局空 tray。
+- 结果只保留在页面内存最近 100 条，不持久化、不上传、不生成替代选项；`?authority_shadow=0` 可关闭，`npm run test:authority-shadow` 验证零改写合同。
