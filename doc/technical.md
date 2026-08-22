@@ -77,3 +77,6 @@
 
 - `engine/authorityShadow.ts` 在不改变确定性列车阶段流的前提下，将已显示选项按原有 `domainRules` 分类为 `accepted / rejected / open`，并报告非终局空 tray。
 - 结果只保留在页面内存最近 100 条，不持久化、不上传、不生成替代选项；`?authority_shadow=0` 可关闭，`npm run test:authority-shadow` 验证零改写合同。
+## 2026-08-23 混合音频升级
+
+`src/story/audio/` 新增本作专属的柴油列车主题与积水车厢环境声，精确反馈继续由 Web Audio 负责。未知地点使用默认环境声；长音频自然结束后等待再播放，文件或自动播放失败不影响故事状态。

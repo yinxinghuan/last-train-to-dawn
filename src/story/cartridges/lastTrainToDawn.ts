@@ -2,6 +2,8 @@ import type { Locale, StoryCartridge, StoryDangerDirector, StoryDomainRules, Sto
 
 const coverImage = new URL('../img/worlds/last-train-to-dawn.png', import.meta.url).href
 const entryImage = new URL('../img/worlds/last-train-to-dawn-entry-v2.png', import.meta.url).href
+const audioThemeUrl = new URL('../audio/assets/theme.mp3', import.meta.url).href
+const audioAmbienceUrl = new URL('../audio/assets/ambience.mp3', import.meta.url).href
 
 const demoZh = [
   {
@@ -461,7 +463,7 @@ function build(locale: Locale): StoryCartridge {
       itemImagingBody: s('物品的磨损、用途和来历正在被记录。', 'The object’s wear, use and provenance are being recorded.'),
     },
     theme: { outer: '#10191D', surface: '#1B282C', paper: '#EFE8D7', ink: '#172126', muted: '#697276', accent: '#178C72', danger: '#D74935', gold: '#D49B3A', material: 'wayfarer' },
-    audioTheme: { material: 'wayfarer', bpm: 62, rootHz: 55, scale: [1, 1.2, 1.333, 1.5, 1.778], levels: { music: 0.15, ambient: 0.23, sfx: 0.28, master: 0.72 }, tension: [{ statId: 'fuel', direction: 'low', weight: 0.25 }, { statId: 'condition', direction: 'low', weight: 0.45 }, { statId: 'morale', direction: 'low', weight: 0.3 }] },
+    audioTheme: { material: 'wayfarer', bpm: 62, rootHz: 55, scale: [1, 1.2, 1.333, 1.5, 1.778], levels: { music: 0.15, ambient: 0.23, sfx: 0.28, master: 0.72 }, tension: [{ statId: 'fuel', direction: 'low', weight: 0.25 }, { statId: 'condition', direction: 'low', weight: 0.45 }, { statId: 'morale', direction: 'low', weight: 0.3 }], recorded: { music: { src: audioThemeUrl, gain: .19 }, ambience: { src: audioAmbienceUrl, gain: .3 } } },
     itemImageDirection: 'railway field inventory photograph on worn cream route paper and dark wet steel, object only, clear scale and wear, no people, no readable text, square',
     sceneImageDirection: 'grounded cinematic near-present railway disaster journey drama aboard one specific weathered two-car REGIONAL DIESEL TRAIN running on rural branch tracks, never a road automobile and never an urban subway. Its recurring home stage is INSIDE the same train: old individual brown vinyl seats, overhead luggage racks, cream enamel wall panels, oxidized steel window frames, a compact connected driver cab, maintenance vestibule, medical corner and warm carriage lamps. When an action can be staged aboard, the camera must remain inside and this recognisable regional-train architecture must fill at least 70% of the frame; routes, bridges, small stations and danger are seen through rain-streaked windows, the windscreen or an open doorway. Exterior shots are reserved for actions that physically require leaving the train, and the next compatible beat returns inside. One legible action, clear actor separation, signal red accents, 4:5 portrait central safe composition, no readable text, no UI',
     sceneImageAvoid: 'road car, automobile, bus, coach bus, urban subway, metro carriage, underground platform, modern commuter metro, camera standing on the tracks, rails as the dominant foreground, exterior train hero shot, repeated departure canopy, generic railway landscape, empty carriage, luxury-train styling, cyberpunk neon, steampunk, readable signs, pseudo-writing, duplicated faces, merged actors',
