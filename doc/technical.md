@@ -11,6 +11,7 @@
 
 - `src/story/cartridges/lastTrainToDawn.ts`：世界规则、开场、三项数值、人物、地图、物品、八章结构、危险导演和中英文演示切片。
 - `src/story/engine/domainRules.ts`：自由文本意图匹配、前置条件裁判、原子效果结算、本地后续选项、模型协议隔离和派生物品指标；拒绝动作不推进危险计时，丢弃命令不参与图片/里程碑触发。
+- `src/story/engine/executeTurn.ts`：与 React、DOM、媒体和存储解耦的服务端普通回合权威边界。
 - `src/story/engine/` 其余模块：协议解析、状态 reducer、危险导演、图片导演、结局导演和世界上下文构建。
 - `src/story/engine/reducer.ts` 同时维护角色首次登场：`hiddenUntilIntroduced` 人物不进入初始/旧存档人物面板，可见 `character_update` 后才以 Cartridge 稳定 ID 创建。
 - `src/story/engine/endingDirector.ts` 只为结局快照里真实出现过的必需角色生成后日谈，隐藏人物不会在最终页被提前泄漏。
@@ -23,6 +24,8 @@
 - `_qa/character-debut.ts`：验证未来固定人物不会提前进入面板，旧预载状态可修复，可见介绍后恢复稳定 Cartridge 身份。
 
 ## 3. 核心模块
+
+`executeStoryTurn()` 保持本作现有 `domain resolution → narrator → protocol → reducer` 顺序：确定性领域效果仍由 reducer 掌握，但已接受领域动作目前会先把 `domainResolution` 交给 narrator 生成可见叙事。`_qa/server-turn-pipeline.ts` 固定验证这一差异、领域效果原子提交、输入不变性与普通模型提议。电影式阶段仍由 `StoryShell.tsx` 呈现；终局快照与 `endingAdapter.ts` 仍是独立第二阶段事务。当前仅为源码 canary，正式写入仍等待后端可验证的 AlterU 玩家身份；后续服务化时应为领域动作增加确定性叙事 fallback，避免 narrator 故障阻断已可本地裁判的事务。
 
 ### 状态与主循环
 
