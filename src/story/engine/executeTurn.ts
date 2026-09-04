@@ -2,7 +2,7 @@ import type { AdapterContext, AdapterResult, Locale, StoryCartridge, StorySave }
 import { parseStoryProtocol } from './protocol'
 import { applyParsedScene } from './reducer'
 import { buildDangerDirective } from './dangerDirector'
-import { domainOwnsDanger, resolveDomainAction } from './domainRules'
+import { domainDemoContent, domainOwnsDanger, resolveDomainAction } from './domainRules'
 
 export interface StoryTurnGenerator {
   send(action: string, context: AdapterContext): Promise<AdapterResult>
@@ -34,9 +34,15 @@ export async function executeStoryTurn(options: {
   const dangerDirective = domainResolution?.status === 'rejected' || domainOwnsDanger(domainResolution)
     ? undefined
     : buildDangerDirective(base, cartridge, action)
-  const result = await options.generator.send(action, {
-    cartridge, save: base, actionId: action, locale, dangerDirective, domainResolution,
-  })
+  let result: AdapterResult
+  try {
+    result = await options.generator.send(action, {
+      cartridge, save: base, actionId: action, locale, dangerDirective, domainResolution,
+    })
+  } catch (cause) {
+    if (!domainResolution) throw cause
+    result = { content: domainDemoContent(domainResolution) }
+  }
   const parsed = parseStoryProtocol(result.content, locale)
   return {
     save: applyParsedScene(

@@ -37,6 +37,14 @@ export function createInitialSave(cartridge: StoryCartridge, remoteChatId?: stri
   return syncDomainDerivedState(initial, cartridge)
 }
 
+export function enterStory(save: StorySave, cartridge: StoryCartridge): StorySave {
+  const openingImage = save.blocks.find(block => block.kind === 'image')
+  const entered = { ...save, locale: cartridge.locale, entered: true }
+  return openingImage && openingImage.data?.status === 'idle'
+    ? updateImageBlock(entered, openingImage.id, { status: 'queued' })
+    : entered
+}
+
 type CharacterCommand = Extract<ParsedCommand, { type: 'character_update' | 'party_change' }>
 
 function characterFromDefinition(character: CharacterDefinition): StoryCharacter {

@@ -12,6 +12,8 @@
 - `src/story/cartridges/lastTrainToDawn.ts`：世界规则、开场、三项数值、人物、地图、物品、八章结构、危险导演和中英文演示切片。
 - `src/story/engine/domainRules.ts`：自由文本意图匹配、前置条件裁判、原子效果结算、本地后续选项、模型协议隔离和派生物品指标；拒绝动作不推进危险计时，丢弃命令不参与图片/里程碑触发。
 - `src/story/engine/executeTurn.ts`：与 React、DOM、媒体和存储解耦的服务端普通回合权威边界。
+- `server/storySessionLab.ts`：仅监听 loopback 的 owner-scoped WAL SQLite Story Session 权威实验服务。
+- `src/story/session/storySessionClient.ts` / `storySessionJournal.ts`：HTTP 合同、请求前 checkpoint、未知结果对账、显式旅程切换与独立终局 checkpoint。
 - `src/story/engine/` 其余模块：协议解析、状态 reducer、危险导演、图片导演、结局导演和世界上下文构建。
 - `src/story/engine/reducer.ts` 同时维护角色首次登场：`hiddenUntilIntroduced` 人物不进入初始/旧存档人物面板，可见 `character_update` 后才以 Cartridge 稳定 ID 创建。
 - `src/story/engine/endingDirector.ts` 只为结局快照里真实出现过的必需角色生成后日谈，隐藏人物不会在最终页被提前泄漏。
@@ -25,7 +27,13 @@
 
 ## 3. 核心模块
 
-`executeStoryTurn()` 保持本作现有 `domain resolution → narrator → protocol → reducer` 顺序：确定性领域效果仍由 reducer 掌握，但已接受领域动作目前会先把 `domainResolution` 交给 narrator 生成可见叙事。`_qa/server-turn-pipeline.ts` 固定验证这一差异、领域效果原子提交、输入不变性与普通模型提议。电影式阶段仍由 `StoryShell.tsx` 呈现；终局快照与 `endingAdapter.ts` 仍是独立第二阶段事务。当前仅为源码 canary，正式写入仍等待后端可验证的 AlterU 玩家身份；后续服务化时应为领域动作增加确定性叙事 fallback，避免 narrator 故障阻断已可本地裁判的事务。
+`executeStoryTurn()` 保持本作现有 `domain resolution → narrator → protocol → reducer` 顺序：确定性领域效果仍由 reducer 掌握，已接受领域动作先把 `domainResolution` 交给 narrator 生成可见叙事。若 narrator 请求失败但行动已命中 governed rule，服务使用同一 resolution 的 `domainDemoContent()` 生成确定性可见结果与三项本地选项，再原子提交；普通开放行动的模型故障仍抛错并保持零写入。`_qa/server-turn-pipeline.ts` 同时验证 narrator 正常路径、accepted domain narrator outage fallback、领域效果原子提交、输入不变性与普通模型提议。
+
+`server/storySessionLab.ts`、`storySessionClient.ts` 与 `storySessionJournal.ts` 构成当前 `local-client-canary-passed`。服务以 owner-scoped WAL SQLite 保存快照、version、cursor、events、幂等响应、hash-only audit 和最小目录；两个 Node 进程并发时，同版本不同 action 只有一个胜者，相同 action 只提交一次。客户端在请求前持久化 enrollment、ordinary pending 与 ending pending，响应丢失或进程重启后按稳定 action/ending id 对账。`enterStory()` 已从 React hook 的匿名更新抽成纯 reducer 函数，React 与服务端测试共享同一 `entered=true + opening image queued` 合同。
+
+旧存档修复只能显式调用固定迁移 `last-train-to-dawn-save-v8-repair-2026-09-04`：普通 GET 只读，浏览器不能上传目标 snapshot；服务从权威快照运行 `normalizeSave()`，只增加 session version，不制造普通剧情 cursor/event。电影式终局使用独立 ending id 绑定服务端冻结快照，checkpoint 先于生成器写入；丢响应、重放和服务重启不会重复生成或提交。
+
+当前 17/17 package 登记测试、构建、凭据/API Base/存储/能力/diff 门禁通过；`liveModelCalled=false`、`productionWrites=false`。正式 UI、云存档、Worker 和生产默认未改变。下一阶段是隔离 React canary；生产仍需要后端可验证 AlterU 身份、正式数据库/Worker、两账号/设备、灰度和回滚。
 
 ### 状态与主循环
 
@@ -62,6 +70,7 @@
 - 调数值：受管辖动作修改 `domainRules.effects`；非受管辖自由行动才修改模型协议与 `widget` 限制。三项主数值仍保持燃料、车况、人心。
 - 加人物/物品/地点：使用稳定 ID 添加到 `characters`、`initialInventory`、`initialMap`，并通过协议事务显式改变状态。
 - 加后端或多人痕迹：在 `src/story/adapters/` 增加适配器；共享内容只能补充站点传闻、援助或痕迹，不能覆盖本地权威主线状态。
+- 改 Story Session HTTP、SQLite schema、幂等、迁移、目录或 ending 事务：编辑 `server/storySessionLab.ts`；改客户端 checkpoint 与未知结果恢复：编辑 `src/story/session/storySessionClient.ts` 和 `storySessionJournal.ts`。当前 QA token 与本机 SQLite 不能直接搬入生产。
 
 ## 连续性守门（2026-08-13）
 

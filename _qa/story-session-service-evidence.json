@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "game": "last-train-to-dawn",
+  "capturedAt": "2026-09-04T12:11:00+08:00",
+  "stage": "local-client-canary-passed",
+  "productionDefaultChanged": false,
+  "productionWrites": false,
+  "liveModelCalled": false,
+  "reactMounted": false,
+  "identityMode": "synthetic-loopback-qa-token",
+  "tests": [
+    "npm run test:server-turn",
+    "npm run test:story-session-client",
+    "npm run test:story-session-persistence",
+    "npm run test:story-session-directory",
+    "npm run test:story-session-migration",
+    "npm run test:story-session-ending",
+    "npm run build"
+  ],
+  "verified": [
+    "accepted governed actions keep the narrator path when available and commit from deterministic cartridge text when the narrator fails",
+    "ordinary non-governed model outage remains zero-write",
+    "React and service tests share one pure enterStory reducer contract",
+    "old-save enrollment and ordinary pending action persist before network writes",
+    "unknown ordinary-turn outcomes reconcile by cursor and action id with one commit",
+    "two Node processes share durable owner-scoped WAL SQLite state",
+    "transaction failure rolls back snapshot, cache, event and audit",
+    "lost response plus process termination recovers after database reopen",
+    "owner-scoped directory exposes minimal metadata and explicit switch fails closed",
+    "normal GET is read-only and explicit v8 repair rejects client target snapshots",
+    "two authorities commit one migration and hash-only replay survives restart",
+    "ending has a separate stable id and is bound to the authoritative frozen snapshot",
+    "ending checkpoint persists before network and lost response recovers without regeneration",
+    "ending commit increments session version without adding ordinary cursor or event",
+    "ending replay, payload conflict, owner isolation, snapshot mismatch and transaction rollback are covered",
+    "all 17 package-registered regressions, TypeScript/Vite build, public-secret, API-base, storage, capability declaration and diff checks pass"
+  ],
+  "notVerified": [
+    "backend-verifiable AlterU identity",
+    "production database or Worker adapter",
+    "React cinematic UI Story Session server path or saved-journey browser canary",
+    "real accounts, devices, model calls or media calls",
+    "production cohort, rollback or deployment"
+  ]
+}

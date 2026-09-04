@@ -29,6 +29,29 @@ assert.equal(domain.save.facts['starter-repaired'], true)
 assert.ok(domain.save.partyMemberIds.includes('ada-mechanic'))
 assert.equal(JSON.stringify(initial), initialJson, 'server pipeline must not mutate its input snapshot')
 
+let failedNarratorCalls = 0
+const fallback = await executeStoryTurn({
+  save: initial,
+  cartridge: lastTrainToDawn,
+  action: '和阿达检修启动机',
+  generator: {
+    async send() {
+      failedNarratorCalls += 1
+      throw new Error('QA_NARRATOR_OUTAGE')
+    },
+  },
+})
+assert.equal(fallback.source, 'domain')
+assert.equal(failedNarratorCalls, 1)
+assert.equal(fallback.save.scene, initial.scene + 1)
+assert.equal(fallback.save.stats.condition, initial.stats.condition + 5)
+assert.equal(fallback.save.facts['starter-repaired'], true)
+assert.ok(fallback.save.partyMemberIds.includes('ada-mechanic'))
+assert.deepEqual(fallback.save.choices.map(choice => choice.label), [
+  '搜查西侧燃料棚', '检查制动与转向架', '说明上车规则',
+])
+assert.equal(JSON.stringify(initial), initialJson, 'fallback must not mutate its input snapshot')
+
 let modelCalls = 0
 const model = await executeStoryTurn({
   save: initial,
@@ -55,6 +78,7 @@ assert.ok(model.save.choices.length >= 1)
 console.log(JSON.stringify({ ok: true, checks: [
   'server-compatible-ordinary-turn',
   'domain-resolution-is-provided-to-narrator',
+  'accepted-domain-action-survives-narrator-outage',
   'domain-effects-commit-together',
   'input-snapshot-remains-immutable',
   'model-proposal-enters-authoritative-reducer',
