@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "game": "last-train-to-dawn",
+  "capturedAt": "2026-09-04T16:10:00+08:00",
+  "stage": "local-react-canary-passed",
+  "productionDefaultChanged": false,
+  "productionWrites": false,
+  "liveModelCalled": false,
+  "liveMediaCalled": false,
+  "reactMounted": true,
+  "identityMode": "synthetic-loopback-qa-token",
+  "tests": [
+    "npm run test:server-turn",
+    "npm run test:story-session-client",
+    "npm run test:story-session-persistence",
+    "npm run test:story-session-directory",
+    "npm run test:story-session-migration",
+    "npm run test:story-session-ending",
+    "npm run test:story-session-history-browser",
+    "npm run build"
+  ],
+  "screenshots": [
+    "_qa/ui/platform-layout-last-train-to-dawn-session-decision-zh-390x844.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-session-history-zh-390x844.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-ending-recovered-zh-390x844.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-session-history-en-320x568.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-session-decision-zh-390x844-recheck.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-session-history-zh-390x844-recheck.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-ending-recovered-zh-390x844-recheck.png",
+    "_qa/ui/platform-layout-last-train-to-dawn-session-history-en-320x568-recheck.png"
+  ],
+  "verified": [
+    "the real cinematic StoryGameView mounts one Story Session journal writer in an isolated loopback-only QA entry",
+    "cover entry remains presentation state and does not manufacture an ordinary Story Session turn before the first train choice",
+    "decision-resolving-result-decision preserves the authored result before exposing the next choices",
+    "a narrator outage for a governed train action uses deterministic visible fallback text and commits the accepted domain transaction atomically",
+    "an unknown first-turn response survives reload, remains visibly recoverable and reconciles to exactly one committed turn",
+    "the scene-zero presentation effect no longer hides the unknown-result recovery state",
+    "a recovered committed turn returns to result presentation before next choices become visible",
+    "an unknown ending response survives reload and commits exactly one generated ending without incrementing the ordinary cursor",
+    "restart creates a new journey while retaining the previous journey for explicit switching",
+    "owner and locale session directories remain isolated",
+    "session rows are 52 CSS pixels high and both mobile widths avoid horizontal overflow",
+    "matched first-pass and recheck captures have no P0 or P1 visual findings",
+    "the production wrapper continues to use the original runtime and the production bundle excludes local Story Session lab markers",
+    "all package-registered tests, TypeScript and Vite build, strict UI, public-secret, API-base, storage, capability and diff checks pass"
+  ],
+  "notVerified": [
+    "backend-verifiable AlterU identity",
+    "production database and Worker adapter",
+    "real accounts, devices, model calls or media calls",
+    "recoverable Story Session media transactions",
+    "server-controlled cohort, rollback, deployment or live traffic"
+  ]
+}
