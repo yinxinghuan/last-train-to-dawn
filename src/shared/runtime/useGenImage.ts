@@ -3,6 +3,7 @@ import { getGameUuid } from './game-id'
 import { createMediaRequestId, generateImageMedia, MediaServiceError } from './media'
 
 export interface GenImageRequest {
+  requestId?: string
   prompt: string
   ref_url?: string
   requestedSize: { width: number; height: number }
@@ -14,14 +15,14 @@ export function useGenImage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const pendingRequestIds = useRef(new Map<string, string>())
-  const generate = useCallback(async ({ prompt, ref_url, requestedSize, profile, referenceMode = 'edit' }: GenImageRequest) => {
+  const generate = useCallback(async ({ requestId: suppliedRequestId, prompt, ref_url, requestedSize, profile, referenceMode = 'edit' }: GenImageRequest) => {
     setLoading(true); setError(null)
     try {
       const sessionId = getGameUuid()
       if (!sessionId) throw new Error('last-train-to-dawn media: game UUID is unavailable')
       {
         const requestKey = JSON.stringify({ prompt, ref_url, requestedSize, profile, referenceMode })
-        const requestId = pendingRequestIds.current.get(requestKey) ?? createMediaRequestId()
+        const requestId = suppliedRequestId ?? pendingRequestIds.current.get(requestKey) ?? createMediaRequestId()
         pendingRequestIds.current.set(requestKey, requestId)
         try {
           const task = await generateImageMedia({

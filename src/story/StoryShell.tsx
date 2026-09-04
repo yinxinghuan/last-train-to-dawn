@@ -10,6 +10,8 @@ import { useAvatarImageReference } from './useAvatarImageReference'
 import { useStoryAudio } from './audio/useStoryAudio'
 import { selectStageOverlay, stageNarrativeBlocks } from './engine/stageNarrative'
 import type { StorySessionDirectory } from './session/storySessionClient'
+import { useStorySessionBootstrap } from './session/useStorySessionBootstrap'
+import { useStorySessionEngine } from './session/useStorySessionEngine'
 
 export type StoryEngineView = ReturnType<typeof useStoryEngine> & {
   actionBlocked?: boolean
@@ -914,7 +916,7 @@ export function StoryGameView({ cartridge, engine, player, onSelect, onLocaleCha
   </main>
 }
 
-function Game({ cartridge, mode, chatId, onSelect, onLocaleChange, uiVariant }: { cartridge: StoryCartridge; mode: StoryMode; chatId?: string; onSelect: (id: string) => void; onLocaleChange: (locale: Locale) => void; uiVariant: UiVariant }) {
+function LegacyGame({ cartridge, mode, chatId, onSelect, onLocaleChange, uiVariant }: { cartridge: StoryCartridge; mode: StoryMode; chatId?: string; onSelect: (id: string) => void; onLocaleChange: (locale: Locale) => void; uiVariant: UiVariant }) {
   const player = usePlayerProfile()
   const imageWidth = cartridge.mediaDirector?.imageTarget.width ?? 640
   const imageHeight = cartridge.mediaDirector?.imageTarget.height ?? 360
@@ -923,6 +925,20 @@ function Game({ cartridge, mode, chatId, onSelect, onLocaleChange, uiVariant }: 
   return <StoryGameView cartridge={cartridge} engine={engine} player={player} onSelect={onSelect} onLocaleChange={onLocaleChange} uiVariant={uiVariant} />
 }
 
+function SessionBoundGame({ player, bootstrap, ...props }: { cartridge: StoryCartridge; player: PlayerProfile; bootstrap: NonNullable<ReturnType<typeof useStorySessionBootstrap>>; onSelect: (id: string) => void; onLocaleChange: (locale: Locale) => void; uiVariant: UiVariant }) {
+  const imageWidth = props.cartridge.mediaDirector?.imageTarget.width ?? 640
+  const imageHeight = props.cartridge.mediaDirector?.imageTarget.height ?? 360
+  const imageIdentity = useAvatarImageReference(player.imageRefUrl, player.loaded, imageWidth, imageHeight)
+  const engine = useStorySessionEngine({ cartridge: props.cartridge, ...bootstrap, imageIdentity })
+  return <StoryGameView cartridge={props.cartridge} engine={engine} player={player} onSelect={props.onSelect} onLocaleChange={props.onLocaleChange} uiVariant={props.uiVariant} />
+}
+
+function SessionGame(props: { cartridge: StoryCartridge; onSelect: (id: string) => void; onLocaleChange: (locale: Locale) => void; uiVariant: UiVariant }) {
+  const player = usePlayerProfile()
+  const bootstrap = useStorySessionBootstrap('last-train-to-dawn', props.cartridge)
+  if (!bootstrap) return <div className="st-loading" style={setCssTheme(props.cartridge)}><i /><span>{t(props.cartridge.locale, 'restoring')}</span></div>
+  return <SessionBoundGame key={bootstrap.scope} {...props} player={player} bootstrap={bootstrap} />
+}
 export default function StoryShell() {
   const initial = useInitialCartridge()
   const [cartridgeId, setCartridgeId] = useState(initial ?? DEFAULT_CARTRIDGE_ID)
@@ -932,6 +948,7 @@ export default function StoryShell() {
   const cartridge = useMemo(() => cartridgeForUi(resolveCartridge(cartridgeId, locale), uiVariant), [cartridgeId, locale, uiVariant])
   const chatId = params.get('chat_id') || undefined
   const mode: StoryMode = chatId ? 'remote' : params.get('story_mode') === 'demo' ? 'demo' : 'aigram'
+  const useLegacyRuntime = Boolean(chatId) || mode === 'demo' || params.get('story_runtime') === 'legacy'
   useEffect(() => { document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en' }, [locale])
   useEffect(() => {
     document.documentElement.dataset.uiVariant = uiVariant
@@ -942,5 +959,7 @@ export default function StoryShell() {
     setCartridgeId(id)
   }
   const changeLocale = (next: Locale) => { rememberLocale(next); setLocale(next) }
-  return <Game key={cartridge.id} cartridge={cartridge} mode={mode} chatId={chatId} onSelect={select} onLocaleChange={changeLocale} uiVariant={uiVariant} />
+  return useLegacyRuntime
+    ? <LegacyGame key={`legacy:${cartridge.id}`} cartridge={cartridge} mode={mode} chatId={chatId} onSelect={select} onLocaleChange={changeLocale} uiVariant={uiVariant} />
+    : <SessionGame key={`session:${cartridge.id}`} cartridge={cartridge} onSelect={select} onLocaleChange={changeLocale} uiVariant={uiVariant} />
 }
